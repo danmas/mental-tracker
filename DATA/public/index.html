@@ -128,7 +128,7 @@
             </div>
         </div>
         <div class="button-group">
-            <button onclick="loadFile()">Загрузить файл</button>
+            <button onclick="loadFile()">+Загрузить файл</button>
             <button onclick="saveFile()" class="secondary">Сохранить изменения</button>
             <button onclick="downloadFile()" class="secondary">Скачать файл</button>
             <button onclick="formatJson()" class="secondary">Форматировать JSON</button>
@@ -168,7 +168,8 @@
         async function loadFile() {
             try {
                 const selectedFile = fileSelect.value;
-                const response = await fetch(`${API_URL}/${selectedFile}`);
+                //const response = await fetch(`${API_URL}/${selectedFile}`);
+                const response = await fetch(`/${selectedFile}`);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
                 currentData = data;
@@ -184,8 +185,9 @@
             try {
                 const selectedFile = fileSelect.value;
                 const jsonData = JSON.parse(jsonTextarea.value);
-                const response = await fetch(`${API_URL}/${selectedFile}`, {
-                    method: 'POST',
+                //const response = await fetch(`${API_URL}/${selectedFile}`, {
+                const response = await fetch(`/${selectedFile}`, {
+                        method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
