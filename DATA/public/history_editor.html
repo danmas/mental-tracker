@@ -109,7 +109,8 @@
 
         async function loadHistory() {
             try {
-                const response = await fetch(`${API_URL}/history`);
+                //const response = await fetch(`${API_URL}/history`);
+                const response = await fetch(`/history`);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
                 historyTextarea.value = JSON.stringify(data, null, 2);
@@ -122,8 +123,9 @@
         async function saveHistory() {
             try {
                 const jsonData = JSON.parse(historyTextarea.value);
-                const response = await fetch(`${API_URL}/history`, {
-                    method: 'POST',
+                //const response = await fetch(`${API_URL}/history`, {
+                const response = await fetch(`/history`, {
+                        method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },

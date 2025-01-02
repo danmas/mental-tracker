@@ -37,39 +37,6 @@ async function readActionsData() {
     }
 }
 
-// async function addActivity(activity) {
-//     try {
-//         console.log('--- addActivity(activity() '+ activity);
-
-//         const actionsData = await readActionsData();
-        
-//         // Генерируем уникальный id для активности
-//         const activityId = `activity_${Date.now()}`;
-        
-//         // Валидация обязательных полей
-//         if (!activity.name || !activity.skill_code || !activity.points) {
-//             throw new Error('Отсутствуют обязательные поля (name, skill_code, points)');
-//         }
-
-//         // Добавляем новую активность
-//         actionsData.activities[activityId] = {
-//             name: activity.name,
-//             description: activity.description || '',
-//             points: activity.points,
-//             skill_code: activity.skill_code
-//         };
-
-//         // Сохраняем обновленный файл
-//         await fs.writeFile(actionsFilePath, JSON.stringify(actionsData, null, 4));
-
-//         return {
-//             id: activityId,
-//             ...actionsData.activities[activityId]
-//         };
-//     } catch (error) {
-//         throw error;
-//     }
-// }
 
 async function addActivity(activity) {
     try {

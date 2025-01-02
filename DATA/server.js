@@ -223,5 +223,5 @@ app.get('/editor', (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`+Сервер запущен на порту ${port}`);
+    console.log(`++Сервер запущен на порту ${port}`);
 });
