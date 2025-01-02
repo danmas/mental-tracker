@@ -1,2 +1,4 @@
 UI/node_modules/*
 DATA/node_modules/*
+DATA/public/history.json
+DATA/public/actions.json
