@@ -1,0 +1,233 @@
+﻿ /* стили для модального окна после существующих стилей:*/
+
+ .points-badge {
+    background-color: #1E3A8A;
+    color: #93C5FD;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+}
+
+/* Модальное окно */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal {
+    background-color: #1F2937;
+    border: 1px solid #374151;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 500px;
+    position: relative;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: #9CA3AF;
+    cursor: pointer;
+    font-size: 1.5rem;
+    padding: 0.5rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #9CA3AF;
+}
+
+.form-select, .form-input, .form-textarea {
+    width: 100%;
+    padding: 0.5rem;
+    background-color: #374151;
+    border: 1px solid #4B5563;
+    border-radius: 0.25rem;
+    color: #F3F4F6;
+    margin-bottom: 1rem;
+}
+
+.form-select option {
+    background-color: #374151;
+    color: #F3F4F6;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: #1E3A8A;
+    color: #93C5FD;
+}
+
+.btn-secondary {
+    background-color: #374151;
+    color: #9CA3AF;
+}
+
+
+/* Общие стили */
+body {
+    margin: 0;
+    font-family: -apple-system, system-ui, sans-serif;
+    background-color: #111827;
+    color: #F3F4F6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Навигация */
+.nav {
+    background-color: #1F2937;
+    border-bottom: 1px solid #374151;
+    padding: 1rem 0;
+}
+
+.nav-content {
+    display: flex;
+    align-items: center;
+}
+
+.back-button {
+    background: none;
+    border: none;
+    color: #9CA3AF;
+    cursor: pointer;
+    padding: 0.5rem;
+    margin-right: 1rem;
+    border-radius: 9999px;
+}
+
+.back-button:hover {
+    background-color: #374151;
+}
+
+/* Грид с карточками */
+.skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    padding: 2rem 0;
+}
+
+.skill-card {
+    background-color: #1F2937;
+    border: 1px solid #374151;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+}
+
+.skill-card:hover {
+    border-color: #4B5563;
+}
+
+.skill-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.skill-icon {
+    background-color: #1E3A8A;
+    color: #60A5FA;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+}
+
+.skill-level {
+    color: #9CA3AF;
+    font-size: 0.875rem;
+}
+
+.progress-bar {
+    background-color: #374151;
+    height: 0.5rem;
+    border-radius: 9999px;
+    margin: 1rem 0;
+}
+
+.progress-fill {
+    background-color: #3B82F6;
+    height: 100%;
+    border-radius: 9999px;
+}
+
+.details-button {
+    width: 100%;
+    background-color: #1E3A8A;
+    color: #93C5FD;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+}
+
+.details-button:hover {
+    background-color: #1E40AF;
+}
+
+/* Детальная страница */
+.skill-detail {
+    background-color: #1F2937;
+    border: 1px solid #374151;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin: 2rem 0;
+}
+
+.history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #374151;
+}
+
+.history-item:last-child {
+    border-bottom: none;
+}
+
+.points-badge {
+    background-color: #1E3A8A;
+    color: #93C5FD;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+}

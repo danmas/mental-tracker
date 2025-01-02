@@ -1,0 +1,236 @@
+{
+    "user": {
+        "id": "user123",
+        "name": "John Doe",
+        "dateJoined": "28.12.2024-13:00:00"
+    },
+    "skills": {
+        "drawing": {
+            "level": 4,
+            "currentPoints": 415,
+            "history": [
+                {
+                    "id": "act_1735728794587",
+                    "activityId": "draw_sketch",
+                    "name": "Скетч карандашом",
+                    "description": "Быстрая зарисовка на любую тему",
+                    "points": 10,
+                    "notes": "Первая активность",
+                    "timestamp": "01.01.2025-13:53:14"
+                },
+                {
+                    "id": "act_1735728796599",
+                    "activityId": "draw_stilllife",
+                    "name": "Рисование натюрморта",
+                    "description": "Рисование натюрморта с натуры",
+                    "points": 25,
+                    "notes": "Вторая активность",
+                    "timestamp": "01.01.2025-13:53:16"
+                },
+                {
+                    "id": "act_1735728798608",
+                    "activityId": "draw_stilllife",
+                    "name": "Рисование натюрморта",
+                    "description": "Рисование натюрморта с натуры",
+                    "points": 25,
+                    "notes": "Третья активность",
+                    "timestamp": "01.01.2025-13:53:18"
+                },
+                {
+                    "id": "act_1735731262897",
+                    "activityId": "activity_1735643197604",
+                    "name": "Цифровой рисунок",
+                    "description": "Создание цифрового рисунка в графическом редакторе",
+                    "points": 20,
+                    "notes": "+20",
+                    "timestamp": "01.01.2025-14:34:22"
+                },
+                {
+                    "id": "act_1735732447919",
+                    "activityId": "activity_1735732436985",
+                    "name": "80",
+                    "description": "80",
+                    "points": 80,
+                    "notes": "+80",
+                    "timestamp": "01.01.2025-14:54:07"
+                },
+                {
+                    "id": "act_1735733738552",
+                    "activityId": "activity_1735643197604",
+                    "name": "Цифровой рисунок",
+                    "description": "Создание цифрового рисунка в графическом редакторе",
+                    "points": 20,
+                    "notes": "ы вы dfs gldf рварва рва рва рва рварарв ар вар вар варварварварарвар",
+                    "timestamp": "01.01.2025-15:15:38"
+                },
+                {
+                    "id": "act_1735734940237",
+                    "activityId": "draw_sketch",
+                    "name": "Скетч карандашом",
+                    "description": "Быстрая зарисовка на любую тему",
+                    "points": 10,
+                    "notes": "",
+                    "timestamp": "01.01.2025-15:35:40"
+                },
+                {
+                    "id": "act_1735742608571",
+                    "activityId": "draw_sketch",
+                    "name": "Скетч карандашом",
+                    "description": "Быстрая зарисовка на любую тему",
+                    "points": 10,
+                    "notes": "Тестовая активность API",
+                    "timestamp": "01.01.2025-17:43:28"
+                }
+            ],
+            "achievements": [
+                {
+                    "id": "ach_1735742608578",
+                    "name": "Тестовое достижение",
+                    "description": "Достижение добавлено через API тест",
+                    "dateEarned": "2025-01-01T14:43:28.578Z"
+                }
+            ],
+            "progress": 15
+        },
+        "music": {
+            "level": 25,
+            "currentPoints": 2581,
+            "history": [
+                {
+                    "id": "act_1735722307687",
+                    "activityId": "practice_scales",
+                    "name": "Практика гамм",
+                    "description": "Игра мажорных гамм",
+                    "points": 10,
+                    "notes": "",
+                    "timestamp": "01.01.2025-12:05:07"
+                },
+                {
+                    "id": "act_1735722336565",
+                    "activityId": "study_music_theory",
+                    "name": "Изучение музыкальной теории",
+                    "description": "Изучение нотной грамоты, музыкальных терминов",
+                    "points": 15,
+                    "notes": "",
+                    "timestamp": "01.01.2025-12:05:36"
+                },
+                {
+                    "id": "act_1735722369918",
+                    "activityId": "activity_1735722356864",
+                    "name": "+70",
+                    "description": "+70",
+                    "points": "70",
+                    "notes": "70",
+                    "timestamp": "01.01.2025-12:06:09"
+                },
+                {
+                    "id": "act_1735726135051",
+                    "activityId": "activity_1735644361253",
+                    "name": "4",
+                    "description": "4",
+                    "points": 4,
+                    "notes": "",
+                    "timestamp": "01.01.2025-13:08:55"
+                },
+                {
+                    "id": "act_1735726153042",
+                    "activityId": "activity_1735644361253",
+                    "name": "4",
+                    "description": "4",
+                    "points": 4,
+                    "notes": "",
+                    "timestamp": "01.01.2025-13:09:13"
+                },
+                {
+                    "id": "act_1735734963070",
+                    "activityId": "activity_1735644187540",
+                    "name": "3",
+                    "description": "3",
+                    "points": 3,
+                    "notes": "",
+                    "timestamp": "01.01.2025-15:36:03"
+                }
+            ],
+            "achievements": [],
+            "progress": 81
+        },
+        "music-theory": {
+            "level": 2,
+            "currentPoints": 280,
+            "history": [
+                {
+                    "id": "act_1735726414652",
+                    "activityId": "activity_1735726401996",
+                    "name": "10",
+                    "description": "10",
+                    "points": 10,
+                    "notes": "10",
+                    "timestamp": "01.01.2025-13:13:34"
+                },
+                {
+                    "id": "act_1735726425027",
+                    "activityId": "activity_1735726401996",
+                    "name": "10",
+                    "description": "10",
+                    "points": 10,
+                    "notes": "10",
+                    "timestamp": "01.01.2025-13:13:45"
+                },
+                {
+                    "id": "act_1735726448083",
+                    "activityId": "activity_1735726439965",
+                    "name": "80",
+                    "description": "80",
+                    "points": 80,
+                    "notes": "10",
+                    "timestamp": "01.01.2025-13:14:08"
+                },
+                {
+                    "id": "act_1735726471050",
+                    "activityId": "activity_1735726439965",
+                    "name": "80",
+                    "description": "80",
+                    "points": 80,
+                    "notes": "10",
+                    "timestamp": "01.01.2025-13:14:31"
+                },
+                {
+                    "id": "act_1735726499554",
+                    "activityId": "activity_1735726401996",
+                    "name": "10",
+                    "description": "10",
+                    "points": 10,
+                    "notes": "10",
+                    "timestamp": "01.01.2025-13:14:59"
+                },
+                {
+                    "id": "act_1735726505978",
+                    "activityId": "activity_1735726401996",
+                    "name": "10",
+                    "description": "10",
+                    "points": 10,
+                    "notes": "10",
+                    "timestamp": "01.01.2025-13:15:05"
+                },
+                {
+                    "id": "act_1735729334865",
+                    "activityId": "activity_1735726439965",
+                    "name": "80",
+                    "description": "80",
+                    "points": 80,
+                    "notes": "80-",
+                    "timestamp": "01.01.2025-14:02:14"
+                }
+            ],
+            "achievements": [],
+            "progress": 26
+        },
+        "willpower": {
+            "level": 0,
+            "currentPoints": "0",
+            "history": [],
+            "achievements": [],
+            "progress": 0
+        }
+    }
+}

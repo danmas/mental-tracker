@@ -1,0 +1,37 @@
+{
+    "user": {
+        "id": "user123",
+        "name": "John Doe",
+        "dateJoined": "2024-12-28T10:00:00Z"
+    },
+    "skills": {
+        "drawing": {
+                "level": 0,
+                "currentPoints": "0",
+                "history": [],
+                "achievements": [],
+                "progress": 0
+            },
+        "music": {
+            "level": 0,
+            "currentPoints": "0",
+            "history": [],
+            "achievements": [],
+            "progress": 0
+    },
+        "music-theory": {
+            "level": 0,
+            "currentPoints": "0",
+            "history": [],
+            "achievements": [],
+            "progress": 0
+        },
+        "willpower": {
+            "level": 0,
+            "currentPoints": "0",
+            "history": [],
+            "achievements": [],
+            "progress": 0
+        }
+    }
+}

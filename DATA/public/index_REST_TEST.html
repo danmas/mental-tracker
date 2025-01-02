@@ -1,0 +1,130 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REST API Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+        .container {
+            background-color: #2d2d2d;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #b8b8b8;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #404040;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: monospace;
+            background-color: #363636;
+            color: #e0e0e0;
+        }
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #5c5c5c;
+            box-shadow: 0 0 0 2px rgba(92, 92, 92, 0.2);
+        }
+        textarea {
+            height: 120px;
+            resize: vertical;
+        }
+        button {
+            background-color: #4d7c4d;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #5c965c;
+        }
+        #response {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #404040;
+            border-radius: 4px;
+            background-color: #363636;
+            min-height: 100px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            color: #e0e0e0;
+        }
+        .error {
+            color: #ff6b6b !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>REST API Interface</h2>
+        <div class="form-group">
+            <label for="url">URL:</label>
+            <input type="text" id="url" value="http://localhost:3000/skills/drawing/points">
+        </div>
+        <div class="form-group">
+            <label for="jsonData">JSON данные:</label>
+            <textarea id="jsonData">{"points": 50}</textarea>
+        </div>
+        <button onclick="sendRequest()">Отправить запрос</button>
+        <div class="form-group">
+            <label>Ответ:</label>
+            <div id="response"></div>
+        </div>
+    </div>
+
+    <script>
+        async function sendRequest() {
+            const urlInput = document.getElementById('url');
+            const jsonDataInput = document.getElementById('jsonData');
+            const responseDiv = document.getElementById('response');
+            
+            try {
+                // Проверяем и парсим JSON
+                const jsonData = JSON.parse(jsonDataInput.value);
+                
+                // Отправляем запрос
+                const response = await fetch(urlInput.value, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(jsonData)
+                });
+                
+                // Получаем ответ
+                const data = await response.json();
+                
+                // Отображаем отформатированный JSON
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+                responseDiv.classList.remove('error');
+            } catch (error) {
+                // В случае ошибки показываем её
+                responseDiv.textContent = 'Ошибка: ' + error.message;
+                responseDiv.classList.add('error');
+            }
+        }
+    </script>
+</body>
+</html>

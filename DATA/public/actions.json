@@ -1,0 +1,112 @@
+{
+    "activities": {
+        "draw_sketch": {
+            "name": "Скетч карандашом",
+            "description": "Быстрая зарисовка на любую тему",
+            "points": 10,
+            "skill_code": "drawing"
+        },
+        "draw_stilllife": {
+            "name": "Рисование натюрморта",
+            "description": "Рисование натюрморта с натуры",
+            "points": 25,
+            "skill_code": "drawing"
+        },
+        "practice_scales": {
+            "name": "Практика гамм",
+            "description": "Игра мажорных гамм",
+            "points": 10,
+            "skill_code": "music"
+        },
+        "study_music_theory": {
+            "name": "Изучение музыкальной теории",
+            "description": "Изучение нотной грамоты, музыкальных терминов",
+            "points": 15,
+            "skill_code": "music"
+        },
+        "meditation": {
+            "name": "Медитация",
+            "description": "Практика медитации и осознанности",
+            "points": 10,
+            "skill_code": "willpower"
+        },
+        "morning_exercise": {
+            "name": "Утренняя зарядка",
+            "description": "Простые упражнения для зарядки",
+            "points": 15,
+            "skill_code": "willpower"
+        },
+        "activity_1735643197604": {
+            "name": "Цифровой рисунок",
+            "description": "Создание цифрового рисунка в графическом редакторе",
+            "points": 20,
+            "skill_code": "drawing"
+        },
+        "activity_1735643400986": {
+            "name": "Цифровой рисунок",
+            "description": "Создание цифрового рисунка в графическом редакторе",
+            "points": 20,
+            "skill_code": "drawing"
+        },
+        "activity_1735643659116": {
+            "name": "+Цифровой рисунок",
+            "description": "Создание цифрового рисунка в графическом редакторе",
+            "points": 20,
+            "skill_code": "drawing"
+        },
+        "activity_1735643768685": {
+            "name": "+Цифровой рисунок",
+            "description": "Создание цифрового рисунка в графическом редакторе",
+            "points": 20,
+            "skill_code": "drawing"
+        },
+        "activity_1735644187540": {
+            "name": "3",
+            "description": "3",
+            "points": 3,
+            "skill_code": "music"
+        },
+        "activity_1735644361253": {
+            "name": "4",
+            "description": "4",
+            "points": 4,
+            "skill_code": "music"
+        },
+        "activity_1735722356864": {
+            "name": "+70",
+            "description": "+70",
+            "points": 70,
+            "skill_code": "music"
+        },
+        "activity_1735726325494": {
+            "name": "5",
+            "description": "5",
+            "points": 5,
+            "skill_code": "music"
+        },
+        "activity_1735726401996": {
+            "name": "10",
+            "description": "10",
+            "points": 10,
+            "skill_code": "music-theory"
+        },
+        "activity_1735726439965": {
+            "name": "80",
+            "description": "80",
+            "points": 80,
+            "skill_code": "music-theory"
+        },
+        "activity_1735732436985": {
+            "name": "80",
+            "description": "80",
+            "points": 80,
+            "skill_code": "drawing"
+        },
+        "activity_1735742608587": {
+            "name": "Цифровой рисунок",
+            "description": "Создание цифрового рисунка в графическом редакторе",
+            "points": 20,
+            "skill_code": "drawing"
+        }
+    }
+}

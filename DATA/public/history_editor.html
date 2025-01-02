@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History Editor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+        .container {
+            background-color: #2d2d2d;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .button-group {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        textarea {
+            width: 100%;
+            height: 600px;
+            padding: 8px;
+            border: 1px solid #404040;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: monospace;
+            background-color: #363636;
+            color: #e0e0e0;
+            resize: vertical;
+            tab-size: 2;
+        }
+        button {
+            background-color: #4d7c4d;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #5c965c;
+        }
+        button.secondary {
+            background-color: #666;
+        }
+        button.secondary:hover {
+            background-color: #777;
+        }
+        #status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #4d7c4d;
+            color: white;
+        }
+        .error {
+            background-color: #7c4d4d;
+            color: white;
+        }
+        #downloadAnchor {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>History Editor</h2>
+        <div class="button-group">
+            <button onclick="loadHistory()">Загрузить текущую историю</button>
+            <button onclick="saveHistory()" class="secondary">Сохранить изменения</button>
+            <button onclick="downloadHistory()" class="secondary">Скачать history.json</button>
+            <button onclick="formatJson()" class="secondary">Форматировать JSON</button>
+        </div>
+        <div class="form-group">
+            <textarea id="historyData" placeholder="JSON данные истории будут загружены сюда"></textarea>
+        </div>
+        <div id="status"></div>
+        <a id="downloadAnchor"></a>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3050';
+        const statusDiv = document.getElementById('status');
+        const historyTextarea = document.getElementById('historyData');
+
+        function showStatus(message, isError = false) {
+            statusDiv.textContent = message;
+            statusDiv.className = isError ? 'error' : 'success';
+            setTimeout(() => {
+                statusDiv.textContent = '';
+                statusDiv.className = '';
+            }, 3000);
+        }
+
+        async function loadHistory() {
+            try {
+                const response = await fetch(`${API_URL}/history`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
+                historyTextarea.value = JSON.stringify(data, null, 2);
+                showStatus('История успешно загружена');
+            } catch (error) {
+                showStatus(`Ошибка загрузки: ${error.message}`, true);
+            }
+        }
+
+        async function saveHistory() {
+            try {
+                const jsonData = JSON.parse(historyTextarea.value);
+                const response = await fetch(`${API_URL}/history`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(jsonData)
+                });
+                
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const result = await response.json();
+                showStatus('История успешно сохранена');
+            } catch (error) {
+                showStatus(`Ошибка сохранения: ${error.message}`, true);
+            }
+        }
+
+        function downloadHistory() {
+            try {
+                const jsonData = JSON.parse(historyTextarea.value);
+                const dataStr = JSON.stringify(jsonData, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                const url = window.URL.createObjectURL(dataBlob);
+                const a = document.getElementById('downloadAnchor');
+                a.href = url;
+                a.download = 'history.json';
+                a.click();
+                window.URL.revokeObjectURL(url);
+                showStatus('Файл готов к скачиванию');
+            } catch (error) {
+                showStatus(`Ошибка при подготовке файла: ${error.message}`, true);
+            }
+        }
+
+        function formatJson() {
+            try {
+                const jsonData = JSON.parse(historyTextarea.value);
+                historyTextarea.value = JSON.stringify(jsonData, null, 2);
+                showStatus('JSON отформатирован');
+            } catch (error) {
+                showStatus(`Ошибка форматирования: ${error.message}`, true);
+            }
+        }
+
+        // Загружаем историю при открытии страницы
+        loadHistory();
+    </script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+    "skills": [
+        {
+            "name": "Рисование",
+            "code": "drawing"
+        },
+        {
+            "name": "Музыка Практика",
+            "code": "music"
+        },
+        {
+            "name": "Музыка Теория",
+            "code": "music-theory"
+        },
+        {
+            "name": "Сила воли",
+            "code": "willpower"
+        }
+    ]
+}

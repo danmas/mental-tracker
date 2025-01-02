@@ -1,0 +1,246 @@
+=== Тестирование REST API Ментального Трекера ===
+
+1. GET /skills - Получение списка всех навыков
+Список навыков: [
+  {
+    "name": "Рисование",
+    "code": "drawing",
+    "level": 1,
+    "currentPoints": 120,
+    "progress": 80
+  },
+  {
+    "name": "Музыка",
+    "code": "music",
+    "level": 2,
+    "currentPoints": 220,
+    "progress": 80
+  },
+  {
+    "name": "Сила воли",
+    "code": "willpower",
+    "level": 2,
+    "currentPoints": 230,
+    "progress": 100
+  }
+]
+
+2. GET /skills/drawing - Получение данных навыка "Рисование"
+Данные навыка: {
+  "name": "Рисование",
+  "code": "drawing",
+  "level": 1,
+  "currentPoints": 120,
+  "progress": 80,
+  "history": [
+    {
+      "id": "act_123",
+      "activityId": "draw_sketch",
+      "timestamp": "2024-12-28T15:30:00Z",
+      "notes": "Нарисовал натюрморт с яблоками",
+      "attachments": [
+        "sketch123.jpg"
+      ]
+    },
+    {
+      "id": "act_1735489367293",
+      "activityId": "draw_sketch",
+      "name": "Скетч карандашом",
+      "description": "Быстрая зарисовка на любую тему",
+      "points": 10,
+      "notes": "Тестовый скетч для проверки API",
+      "timestamp": "2024-12-29T16:22:47.293Z"
+    },
+    {
+      "id": "act_1735491354765",
+      "activityId": "draw_sketch",
+      "name": "Скетч карандашом",
+      "description": "Быстрая зарисовка на любую тему",
+      "points": 10,
+      "notes": "Тестовая активность API",
+      "timestamp": "2024-12-29T16:55:54.765Z"
+    },
+    {
+      "id": "act_1735491758118",
+      "activityId": "draw_sketch",
+      "name": "Скетч карандашом",
+      "description": "Быстрая зарисовка на любую тему",
+      "points": 10,
+      "notes": "Тестовая активность API",
+      "timestamp": "2024-12-29T17:02:38.118Z"
+    },
+    {
+      "id": "act_1735496672874",
+      "activityId": "draw_sketch",
+      "name": "Скетч карандашом",
+      "description": "Быстрая зарисовка на любую тему",
+      "points": 10,
+      "notes": "+10  ---",
+      "timestamp": "2024-12-29T18:24:32.874Z"
+    }
+  ],
+  "achievements": [
+    {
+      "id": "ach_001",
+      "name": "Первые шаги",
+      "description": "Достигнут 2-й уровень в рисовании",
+      "dateEarned": "2024-12-27T18:20:00Z"
+    },
+    {
+      "id": "ach_1735470875596",
+      "name": "Новый уровень",
+      "description": "Достигнут 3-й уровень в рисовании",
+      "dateEarned": "2024-12-29T11:14:35.596Z"
+    },
+    {
+      "id": "ach_1735470991011",
+      "name": "Новый уровень",
+      "description": "Достигнут 3-й уровень в рисовании",
+      "dateEarned": "2024-12-29T11:16:31.011Z"
+    },
+    {
+      "id": "ach_1735475604622",
+      "name": "Новый уровень",
+      "description": "Достигнут 3-й уровень в рисовании",
+      "dateEarned": "2024-12-29T12:33:24.622Z"
+    },
+    {
+      "id": "ach_1735491354772",
+      "name": "Тестовое достижение",
+      "description": "Достижение добавлено через API тест",
+      "dateEarned": "2024-12-29T16:55:54.772Z"
+    },
+    {
+      "id": "ach_1735491758123",
+      "name": "Тестовое достижение",
+      "description": "Достижение добавлено через API тест",
+      "dateEarned": "2024-12-29T17:02:38.123Z"
+    }
+  ]
+}
+
+3. GET /skills/drawing/history - Получение истории навыка "Рисование"
+История навыка: [
+  {
+    "id": "act_123",
+    "activityId": "draw_sketch",
+    "timestamp": "2024-12-28T15:30:00Z",
+    "notes": "Нарисовал натюрморт с яблоками",
+    "attachments": [
+      "sketch123.jpg"
+    ]
+  },
+  {
+    "id": "act_1735489367293",
+    "activityId": "draw_sketch",
+    "name": "Скетч карандашом",
+    "description": "Быстрая зарисовка на любую тему",
+    "points": 10,
+    "notes": "Тестовый скетч для проверки API",
+    "timestamp": "2024-12-29T16:22:47.293Z"
+  },
+  {
+    "id": "act_1735491354765",
+    "activityId": "draw_sketch",
+    "name": "Скетч карандашом",
+    "description": "Быстрая зарисовка на любую тему",
+    "points": 10,
+    "notes": "Тестовая активность API",
+    "timestamp": "2024-12-29T16:55:54.765Z"
+  },
+  {
+    "id": "act_1735491758118",
+    "activityId": "draw_sketch",
+    "name": "Скетч карандашом",
+    "description": "Быстрая зарисовка на любую тему",
+    "points": 10,
+    "notes": "Тестовая активность API",
+    "timestamp": "2024-12-29T17:02:38.118Z"
+  },
+  {
+    "id": "act_1735496672874",
+    "activityId": "draw_sketch",
+    "name": "Скетч карандашом",
+    "description": "Быстрая зарисовка на любую тему",
+    "points": 10,
+    "notes": "+10  ---",
+    "timestamp": "2024-12-29T18:24:32.874Z"
+  }
+]
+
+4. GET /activities - Получение списка доступных действий
+Список действий: {
+  "draw_sketch": {
+    "name": "Скетч карандашом",
+    "description": "Быстрая зарисовка на любую тему",
+    "points": 10,
+    "skill_code": "drawing"
+  },
+  "draw_stilllife": {
+    "name": "Рисование натюрморта",
+    "description": "Рисование натюрморта с натуры",
+    "points": 25,
+    "skill_code": "drawing"
+  },
+  "practice_scales": {
+    "name": "Практика гамм",
+    "description": "Игра мажорных гамм",
+    "points": 10,
+    "skill_code": "music"
+  },
+  "study_music_theory": {
+    "name": "Изучение музыкальной теории",
+    "description": "Изучение нотной грамоты, музыкальных терминов",
+    "points": 15,
+    "skill_code": "music"
+  },
+  "meditation": {
+    "name": "Медитация",
+    "description": "Практика медитации и осознанности",
+    "points": 10,
+    "skill_code": "willpower"
+  },
+  "morning_exercise": {
+    "name": "Утренняя зарядка",
+    "description": "Простые упражнения для зарядки",
+    "points": 15,
+    "skill_code": "willpower"
+  }
+}
+
+5. POST /skills/drawing/history - Добавление новой активности
+Результат добавления активности: {
+  "record": {
+    "id": "act_1735641827324",
+    "activityId": "draw_sketch",
+    "name": "Скетч карандашом",
+    "description": "Быстрая зарисовка на любую тему",
+    "points": 10,
+    "notes": "Тестовая активность API",
+    "timestamp": "2024-12-31T10:43:47.324Z"
+  },
+  "points": {
+    "newPoints": 130,
+    "progress": 70,
+    "level": 1,
+    "pointsForNextLevel": 200
+  }
+}
+
+6. POST /skills/drawing/achievements - Добавление нового достижения
+Результат добавления достижения: {
+  "id": "ach_1735641827333",
+  "name": "Тестовое достижение",
+  "description": "Достижение добавлено через API тест",
+  "dateEarned": "2024-12-31T10:43:47.333Z"
+}
+
+7. POST /skills/drawing/points - Начисление очков
+Результат начисления очков: {
+  "newPoints": 145,
+  "progress": 55,
+  "level": 1,
+  "pointsForNextLevel": 200
+}
+
+9. POST /activities - Создание новой активности
