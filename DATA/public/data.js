@@ -12,8 +12,8 @@ const dateUtils = require('./dateUtils');
 
 // Пути к файлам с данными
 const skillsFilePath = path.join(__dirname, 'skills.json');
-const actionsFilePath = path.join(__dirname, 'actions.json');
-const historyFilePath = path.join(__dirname, 'history.json');
+const actionsFilePath = path.join(__dirname, '--actions.json');
+const historyFilePath = path.join(__dirname, '--history.json');
 
 // --- Чтение данных из JSON файлов ---
 
@@ -91,7 +91,8 @@ async function addActivity(activity) {
         };
 
         // Сохраняем обновленный файл
-        await fs.writeFile(actionsFilePath, JSON.stringify(actionsData, null, 4));
+        //await fs.writeFile(actionsFilePath, JSON.stringify(actionsData, null, 4));
+        await writeActionsData(actionsData);
 
         return {
             id: activityId,
