@@ -27,13 +27,43 @@ async function readSkillsData() {
     }
 }
 
+// async function readActionsData() {
+//     try {
+//         const data = await fs.readFile(actionsFilePath, 'utf-8');
+//         return JSON.parse(data);
+//     } catch (error) {
+//         console.error('Ошибка чтения файла actions.json:', error);
+//         throw new Error(`Ошибка чтения файла: ${actionsFilePath}`);
+//     }
+// }
+
 async function readActionsData() {
     try {
-        const data = await fs.readFile(actionsFilePath, 'utf-8');
-        return JSON.parse(data);
-    } catch (error) {
-        console.error('Ошибка чтения файла actions.json:', error);
-        throw new Error(`Ошибка чтения файла: ${actionsFilePath}`);
+        const response = await axios.get(`https://api.jsonbin.io/v3/b/${BIN_ID_actions}`, {
+            headers: {
+                'X-Master-Key': API_KEY
+            }
+        });
+        return response.data.record;
+        } catch (error) {
+        console.error('Ошибка чтения файла history.json:', error);
+        throw new Error(`Ошибка чтения файла с jsonbin ${historyFilePath}`);
+    }
+}
+
+// --- Запись данных в JSON файлы ---
+
+async function writeActionsData(data) {
+    try {
+        await axios.put(`https://api.jsonbin.io/v3/b/${BIN_ID_actions}`, data, {
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Master-Key': API_KEY
+            }
+        });
+       } catch (error) {
+        console.error('Ошибка записи в файл actions.json:', error);
+        throw new Error(`Ошибка записи в файл actions.json.}`);
     }
 }
 
@@ -81,13 +111,47 @@ module.exports = {
 };
 
 
+// async function readHistoryData() {
+//     try {
+//         const data = await fs.readFile(historyFilePath, 'utf-8');
+//         return JSON.parse(data);
+//     } catch (error) {
+//         console.error('Ошибка чтения файла history.json:', error);
+//         throw new Error(`Ошибка чтения файла: ${historyFilePath}`);
+//     }
+// }
+
+// // --- Запись данных в JSON файлы ---
+
+// async function writeHistoryData(data) {
+//     try {
+//         await fs.writeFile(historyFilePath, JSON.stringify(data, null, 4));
+//     } catch (error) {
+//         console.error('Ошибка записи в файл history.json:', error);
+//         throw new Error(`Ошибка записи в файл: ${historyFilePath}`);
+//     }
+// }
+
+// Бесплатный сервис специально для JSON
+const axios = require('axios');
+const BIN_ID_HISTORY = '6776e6f0ad19ca34f8e4af75';
+const BIN_ID_actions = '6776ee69ad19ca34f8e4b236';
+//const API_KEY = '$2a$10$Jn1kVlOFNV8oXzIJqx5xRemNZGyLAqGK5rerTT5lv43FPgN/qd.Si';
+const API_KEY = '$2a$10$PVL7lQvItBvbwEtyKtmrquOMxG1W9AQd5Cb70p2qVYjW2ytMsGB8.';
+//$2a$10$PVL7lQvItBvbwEtyKtmrquOMxG1W9AQd5Cb70p2qVYjW2ytMsGB8.
+
+
 async function readHistoryData() {
     try {
-        const data = await fs.readFile(historyFilePath, 'utf-8');
-        return JSON.parse(data);
-    } catch (error) {
+        const response = await axios.get(`https://api.jsonbin.io/v3/b/${BIN_ID_HISTORY}`, {
+            headers: {
+                'X-Master-Key': API_KEY
+            }
+        });
+        return response.data.record;
+        } catch (error) {
         console.error('Ошибка чтения файла history.json:', error);
-        throw new Error(`Ошибка чтения файла: ${historyFilePath}`);
+        throw new Error(`Ошибка чтения файла с jsonbin ${historyFilePath}`);
     }
 }
 
@@ -95,12 +159,20 @@ async function readHistoryData() {
 
 async function writeHistoryData(data) {
     try {
-        await fs.writeFile(historyFilePath, JSON.stringify(data, null, 4));
-    } catch (error) {
+        await axios.put(`https://api.jsonbin.io/v3/b/${BIN_ID_HISTORY}`, data, {
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Master-Key': API_KEY
+            }
+        });
+       } catch (error) {
         console.error('Ошибка записи в файл history.json:', error);
         throw new Error(`Ошибка записи в файл: ${historyFilePath}`);
     }
 }
+
+
+
 
 // --- Получение данных ---
 
@@ -271,6 +343,7 @@ module.exports = {
     readActionsData,
     readHistoryData,
     writeHistoryData,
+    writeActionsData,
     getUserData,
     getAllSkills,
     getSkillData,

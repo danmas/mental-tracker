@@ -191,7 +191,8 @@ app.post('/actions', async (req, res) => {
     try {
         const newActions = req.body;
         // Добавим функцию writeActionsData в data.js
-        await fs.writeFile(actionsFilePath, JSON.stringify(newActions, null, 4));
+        await data.writeActionsData(newHistory);
+        // await fs.writeFile(actionsFilePath, JSON.stringify(newActions, null, 4));
         res.json({ success: true, message: 'Actions успешно обновлены' });
     } catch (error) {
         res.status(500).json({ error: error.message });
