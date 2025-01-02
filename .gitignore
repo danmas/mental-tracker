@@ -1,2 +1,2 @@
-./UI/node_modules/
-./DATA/node_modules/
+UI/node_modules/*
+DATA/node_modules/*
