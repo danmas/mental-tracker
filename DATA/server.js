@@ -194,6 +194,8 @@ app.post('/actions', async (req, res) => {
         await data.writeActionsData(newActions);
         // await fs.writeFile(actionsFilePath, JSON.stringify(newActions, null, 4));
         res.json({ success: true, message: 'Actions успешно обновлены' });
+        console.log(`Actions saved.`);
+        
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

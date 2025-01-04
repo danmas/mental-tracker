@@ -185,6 +185,7 @@
             try {
                 const selectedFile = fileSelect.value;
                 const jsonData = JSON.parse(jsonTextarea.value);
+                // alert(`Файл ${selectedFile}.json перед сохранением.`);
                 const response = await fetch(`${API_URL}/${selectedFile}`, {
                     method: 'POST',
                     headers: {
@@ -197,6 +198,8 @@
                 const result = await response.json();
                 showStatus(`Файл ${selectedFile}.json успешно сохранён`);
                 currentData = jsonData;
+                alert(`Файл ${selectedFile}.json успешно сохранён`);
+
             } catch (error) {
                 showStatus(`Ошибка сохранения: ${error.message}`, true);
             }
