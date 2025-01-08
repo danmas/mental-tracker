@@ -220,9 +220,14 @@ app.post('/skills-raw', async (req, res) => {
     }
 });
 
+
 // Обновим маршрут для редактора
 app.get('/editor', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'json_editor.html'));
+});
+
+app.get('/ping', (req, res) => {
+    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
 app.listen(port, () => {

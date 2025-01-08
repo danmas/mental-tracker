@@ -1,11 +1,15 @@
 ﻿<!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ментальный Трекер</title>
     <link rel="stylesheet" href="/style.css">
+    <!-- пинг сервера -->
+    <script src="/keepAlive.js"></script>
 </head>
+
 <body>
     <nav class="nav">
         <div class="container">
@@ -34,10 +38,10 @@
                         <option value="">Выберите действие</option>
                     </select>
                 </div>
-                
+
                 <div class="form-group">
                     <label class="form-label" for="notesInput">Заметки</label>
-                    <textarea id="notesInput" name="notes" class="form-textarea" rows="3" 
+                    <textarea id="notesInput" name="notes" class="form-textarea" rows="3"
                         placeholder="Опишите что вы сделали..."></textarea>
                 </div>
 
@@ -60,7 +64,7 @@
                 <h2>Создать новую активность</h2>
                 <button class="modal-close">&times;</button>
             </div>
-            <form id="newActivityForm"  onsubmit="app.handleNewActivitySubmit(event)">
+            <form id="newActivityForm" onsubmit="app.handleNewActivitySubmit(event)">
                 <div class="form-group">
                     <label class="form-label" for="activityName">Название</label>
                     <input type="text" id="activityName" name="name" class="form-input"
@@ -93,6 +97,30 @@
 
 
     <script src="/app.js"></script>
-</body>
-</html>
 
+    <!-- Пинг сервера -->
+    <script>
+        const keepAlive = new ServerKeepAlive({
+            interval: 40000,
+            maxRetries: 300
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            keepAlive.start();
+        });
+
+        window.addEventListener('beforeunload', () => {
+            keepAlive.stop();
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                keepAlive.stop();
+            } else {
+                keepAlive.start();
+            }
+        });
+    </script>
+</body>
+
+</html>

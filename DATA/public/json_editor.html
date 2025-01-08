@@ -113,6 +113,8 @@
             line-height: 1.4;
         }
     </style>
+    <!-- Добавить в head -->
+    <script src="/keepAlive.js"></script>
 </head>
 <body>
     <div class="container">
@@ -279,5 +281,29 @@
             }
         });
     </script>
+
+<!-- Пинг сервера -->
+<script>
+    const keepAlive = new ServerKeepAlive({
+        interval: 40000,
+        maxRetries: 300
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        keepAlive.start();
+    });
+
+    window.addEventListener('beforeunload', () => {
+        keepAlive.stop();
+    });
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            keepAlive.stop();
+        } else {
+            keepAlive.start();
+        }
+    });
+</script>
 </body>
 </html>
