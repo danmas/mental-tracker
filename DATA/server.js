@@ -138,9 +138,7 @@ app.post('/activities', async (req, res) => {
         }
 
         // Добавляем новую активность
-        console.log("before data.addActivity()");
         const newActivity = await data.addActivity(activity);
-        console.log("after data.addActivity()");
         res.status(201).json(newActivity);
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -194,8 +192,6 @@ app.post('/actions', async (req, res) => {
         await data.writeActionsData(newActions);
         // await fs.writeFile(actionsFilePath, JSON.stringify(newActions, null, 4));
         res.json({ success: true, message: 'Actions успешно обновлены' });
-        console.log(`Actions saved.`);
-        
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -231,5 +227,5 @@ app.get('/ping', (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`++Сервер запущен на порту ${port}`);
+    console.log(`Сервер запущен на порту ${port}`);
 });

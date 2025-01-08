@@ -136,7 +136,6 @@ class MentalTracker {
         const points = form.activityPoints.value;
 
         try {
-            console.log('---+ handleNewActivitySubmit() ');
             const response = await fetch('/activities', {
                 method: 'POST',
                 headers: {
@@ -184,7 +183,7 @@ async loadSkills() {
             throw new Error('Network response was not ok');
         }
         const data = await response.json();
-        console.log('Loaded skills data:', data);  // Отладочный вывод
+        // console.log('Loaded skills data:', data);  // Отладочный вывод
         this.skills = data;
     } catch (error) {
         console.error('Error loading skills:', error);
@@ -212,8 +211,6 @@ async loadSkills() {
         const grid = document.createElement('div');
         grid.className = 'skills-grid';
         
-        console.log('-- renderMainView()' + this.skills);
-
         grid.innerHTML = this.skills.map(skill => `
             <div class="skill-card">
                 <div class="skill-header">
@@ -248,7 +245,6 @@ async loadSkills() {
     async showSkillView(code) {
         this.currentView = 'skill';
         this.currentSkill = await this.loadSkillDetails(code);
-        console.log('this.currentSkill '+ this.currentSkill);
         this.backButton.style.display = 'block';
         this.pageTitle.textContent = this.currentSkill.name;
         this.render();
@@ -262,7 +258,6 @@ async loadSkills() {
         
         // Проверяем значение прогресса
         const progress = typeof skill.progress === 'number' ? skill.progress : 0;
-        console.log('Progress value:', progress);
         
         detail.innerHTML = `
             <div class="skill-header">
@@ -273,11 +268,11 @@ async loadSkills() {
                     <h2>Уровень ${skill.level}</h2>
                     <p>До следующего уровня: ${progress}% (${skill.currentPoints}) очков</p>
                 </div>
-                <button class="btn btn-primary" onclick="app.showNewActivityModal()">
-                    + Создать активность
-                </button>
                 <button class="btn btn-primary" onclick="app.showAddActivityModal()">
                     + Добавить активность
+                </button>
+                <button class="btn btn-primary" onclick="app.showNewActivityModal()">
+                    + Создать активность
                 </button>
             </div>
             

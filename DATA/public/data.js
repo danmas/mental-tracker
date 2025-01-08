@@ -70,8 +70,6 @@ async function writeActionsData(data) {
 
 async function addActivity(activity) {
     try {
-        console.log('--- addActivity(activity() '+ activity);
-
         const actionsData = await readActionsData();
         
         // Генерируем уникальный id для активности
@@ -200,7 +198,6 @@ async function getAllSkills() {
             const sortedHistory = [...skillHistory.history].sort((a, b) => {
                 return new Date(b.timestamp) - new Date(a.timestamp);
             });
-            console.log(`getAllSkills()  skillHistory.level: `+skillHistory.level);    
             return {
                 ...skill,
                 level: skillHistory.level || 0,
@@ -236,7 +233,6 @@ async function getSkillData(skillCode) {
             return dateUtils.parseDate(b.timestamp) - dateUtils.parseDate(a.timestamp);
         });
         
-        console.log(`getSkillData()  skillHistory.level: `+skillHistory.level);    
         // Возвращаем навык со всеми данными и отсортированной историей
         return { 
             ...skill, 

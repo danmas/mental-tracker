@@ -131,7 +131,7 @@ class ServerKeepAlive {
                 this.lastPingTime = new Date();
                 this.retryCount = 0;
                 this.updateStatus('active');
-                console.log('KeepAlive: Server is alive');
+                // console.log('KeepAlive: Server is alive');
             } else {
                 this.handleError('Server returned error status');
             }
