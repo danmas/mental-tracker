@@ -200,10 +200,10 @@ async function getAllSkills() {
             const sortedHistory = [...skillHistory.history].sort((a, b) => {
                 return new Date(b.timestamp) - new Date(a.timestamp);
             });
-
+            console.log(`getAllSkills()  skillHistory.level: `+skillHistory.level);    
             return {
                 ...skill,
-                level: skillHistory.level || 1,
+                level: skillHistory.level || 0,
                 currentPoints: skillHistory.currentPoints || 0,
                 progress: skillHistory.progress || 0,
                 achievements: skillHistory.achievements || [],
@@ -232,17 +232,15 @@ async function getSkillData(skillCode) {
         }
 
         // Сортируем историю по timestamp в обратном порядке
-        // const sortedHistory = [...skillHistory.history].sort((a, b) => {
-        //     return new Date(b.timestamp) - new Date(a.timestamp);
-        // });
         const sortedHistory = [...skillHistory.history].sort((a, b) => {
             return dateUtils.parseDate(b.timestamp) - dateUtils.parseDate(a.timestamp);
         });
         
+        console.log(`getSkillData()  skillHistory.level: `+skillHistory.level);    
         // Возвращаем навык со всеми данными и отсортированной историей
         return { 
             ...skill, 
-            level: skillHistory.level || 1,
+            level: skillHistory.level || 0,
             currentPoints: skillHistory.currentPoints || 0,
             progress: skillHistory.progress || 0,
             achievements: skillHistory.achievements || [],
