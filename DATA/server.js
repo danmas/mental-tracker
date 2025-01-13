@@ -5,6 +5,8 @@ const fs = require('fs');
 
 const data = require('./public/data');
 const game = require('./public/game');
+const dateUtils = require('./public/dateUtils');
+
 
 const app = express();
 app.use(cors());
@@ -240,7 +242,6 @@ app.put('/skills/:skillCode/history/:historyId', async (req, res) => {
             throw new Error('Активность не найдена');
         }
 
-        console.log('-1- Обновляем запись ' + timestamp );
         // Обновляем запись
         skillHistory.history[recordIndex] = {
             ...skillHistory.history[recordIndex],
@@ -249,17 +250,14 @@ app.put('/skills/:skillCode/history/:historyId', async (req, res) => {
             notes,
             timestamp: timestamp // Добавляем обновление timestamp
         };
-        console.log('-2- Обновляем запись ' + timestamp );
 
         // Сохраняем обновленную историю
         await data.writeHistoryData(historyData);
-        console.log('-3- Обновляем запись ' + timestamp );
 
         // Пересортируем историю после обновления даты
         skillHistory.history.sort((a, b) => {
             return dateUtils.parseDate(b.timestamp) - dateUtils.parseDate(a.timestamp);
         });
-        console.log('-4- Обновляем запись ' + timestamp );
         res.json({ success: true });
     } catch (error) {
         console.log('-ERROR- Обновляем запись ' + error.message );
