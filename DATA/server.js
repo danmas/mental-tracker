@@ -222,7 +222,7 @@ app.post('/skills-raw', async (req, res) => {
 app.put('/skills/:skillCode/history/:historyId', async (req, res) => {
     try {
         const { skillCode, historyId } = req.params;
-        const { activityId, notes, timestamp } = req.body;
+        const { activityId, notes, timestamp, points } = req.body;
 
         // Получаем текущую историю
         const historyData = await data.readHistoryData();
@@ -234,22 +234,23 @@ app.put('/skills/:skillCode/history/:historyId', async (req, res) => {
             throw new Error('История не найдена');
         }
 
-        // Получаем информацию о новой активности
-        const activities = await data.getActivities();
-        const activity = activities[activityId];
-
-        if (!activity) {
-            throw new Error('Активность не найдена');
-        }
+        // Получаем старые очки для пересчета общего количества
+        const oldPoints = skillHistory.history[recordIndex].points;
+        const pointsDiff = points - oldPoints;
 
         // Обновляем запись
         skillHistory.history[recordIndex] = {
             ...skillHistory.history[recordIndex],
             activityId,
-            points: activity.points,
+            points: points,
             notes,
-            timestamp: timestamp // Добавляем обновление timestamp
+            timestamp
         };
+
+        // Если очки изменились, обновляем общее количество очков
+        if (pointsDiff !== 0) {
+            await game.addPoints(skillCode, pointsDiff);
+        }
 
         // Сохраняем обновленную историю
         await data.writeHistoryData(historyData);
@@ -258,13 +259,12 @@ app.put('/skills/:skillCode/history/:historyId', async (req, res) => {
         skillHistory.history.sort((a, b) => {
             return dateUtils.parseDate(b.timestamp) - dateUtils.parseDate(a.timestamp);
         });
+
         res.json({ success: true });
     } catch (error) {
-        console.log('-ERROR- Обновляем запись ' + error.message );
         res.status(400).json({ error: error.message });
     }
 });
-
 
 // Обновим маршрут для редактора
 app.get('/editor', (req, res) => {

@@ -511,7 +511,6 @@ async loadSkills() {
 
 //-- NEW-3 
 // Добавим новые методы в класс MentalTracker
-
 groupHistoryByDays(history) {
     const groups = {};
     
@@ -533,7 +532,7 @@ groupHistoryByDays(history) {
         });
 }
 
-async handleActivityEdit(historyId, activityId, notes, date, time) {
+async handleActivityEdit(historyId, activityId, notes, date, time, points) {
     try {
         const response = await fetch(`${SKILLS_SERVICE_URL}/${this.currentSkill.code}/history/${historyId}`, {
             method: 'PUT',
@@ -543,14 +542,23 @@ async handleActivityEdit(historyId, activityId, notes, date, time) {
             body: JSON.stringify({
                 activityId,
                 notes,
+                points: parseInt(points),
                 timestamp: this.formatDateTime(date, time)
             })
         });
         
         if (!response.ok) throw new Error('Failed to update activity');
         
-        // Обновляем данные навыка
-        this.currentSkill = await this.loadSkillDetails(this.currentSkill.code);
+        // Получаем обновленные данные навыка
+        const skillData = await this.loadSkillDetails(this.currentSkill.code);
+        
+        // Обновляем текущий навык новыми данными
+        this.currentSkill = skillData;
+        
+        // Обновляем общий список навыков
+        await this.loadSkills();
+        
+        // Обновляем отображение
         this.render();
         this.hideEditActivityModal();
     } catch (error) {
@@ -578,6 +586,9 @@ showEditActivityModal(historyItem) {
     
     // Заполняем заметки
     form.querySelector('#editNotesInput').value = historyItem.notes;
+    
+    // Заполняем очки
+    form.querySelector('#editPointsInput').value = historyItem.points;
     
     // Заполняем дату и время
     const [datePart, timePart] = historyItem.timestamp.split('-');
@@ -667,7 +678,7 @@ renderSkillView() {
                 <div class="skill-icon">
                     ${this.getSkillIcon(skill.code)}
                 </div>
-                <h2>Уровень ${skill.level}</h2>
+                <h2>Уровень ${skill.level}(${progress}%)</h2>
                 <p>До следующего уровня: ${progress}% (${skill.currentPoints}) очков</p>
             </div>
             <button class="btn btn-primary" onclick="app.showAddActivityModal()">
