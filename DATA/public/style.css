@@ -277,6 +277,8 @@ p { margin: 0.25rem 0; }
 
 /* Добавьте эти стили в ваш style.css файл */
 
+/* Добавьте эти стили в ваш style.css файл */
+
 .history-day {
     margin-bottom: 1rem;
     background-color: #1F2937;
@@ -331,4 +333,29 @@ p { margin: 0.25rem 0; }
 .btn-edit:hover {
     background-color: #374151;
     color: #F3F4F6;
+}
+
+.date-time-group {
+    display: flex;
+    gap: 1rem;
+}
+
+.date-time-group > div {
+    flex: 1;
+}
+
+input[type="date"],
+input[type="time"] {
+    background-color: #374151;
+    border: 1px solid #4B5563;
+    border-radius: 0.25rem;
+    color: #F3F4F6;
+    padding: 0.5rem;
+    width: 100%;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
 }

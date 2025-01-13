@@ -220,7 +220,7 @@ app.post('/skills-raw', async (req, res) => {
 app.put('/skills/:skillCode/history/:historyId', async (req, res) => {
     try {
         const { skillCode, historyId } = req.params;
-        const { activityId, notes } = req.body;
+        const { activityId, notes, timestamp } = req.body;
 
         // Получаем текущую историю
         const historyData = await data.readHistoryData();
@@ -245,17 +245,24 @@ app.put('/skills/:skillCode/history/:historyId', async (req, res) => {
             ...skillHistory.history[recordIndex],
             activityId,
             points: activity.points,
-            notes
+            notes,
+            timestamp: timestamp // Добавляем обновление timestamp
         };
 
         // Сохраняем обновленную историю
         await data.writeHistoryData(historyData);
+
+        // Пересортируем историю после обновления даты
+        skillHistory.history.sort((a, b) => {
+            return dateUtils.parseDate(b.timestamp) - dateUtils.parseDate(a.timestamp);
+        });
 
         res.json({ success: true });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 });
+
 
 // Обновим маршрут для редактора
 app.get('/editor', (req, res) => {
