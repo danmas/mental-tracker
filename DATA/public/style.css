@@ -273,3 +273,62 @@ h2 { font-size: 1.25rem; margin: 0 0 0.5rem 0; }
 h3 { font-size: 1.125rem; margin: 0.75rem 0; }
 h4 { font-size: 1rem; margin: 0; }
 p { margin: 0.25rem 0; }
+
+
+/* Добавьте эти стили в ваш style.css файл */
+
+.history-day {
+    margin-bottom: 1rem;
+    background-color: #1F2937;
+    border: 1px solid #374151;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.day-header {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background-color: #374151;
+    cursor: pointer;
+    user-select: none;
+}
+
+.day-header:hover {
+    background-color: #4B5563;
+}
+
+.day-header h3 {
+    margin: 0 0.5rem;
+    flex: 1;
+}
+
+.day-header span {
+    color: #9CA3AF;
+}
+
+.day-points {
+    color: #60A5FA;
+    font-weight: 500;
+}
+
+.history-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-edit {
+    background-color: transparent;
+    color: #9CA3AF;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid #4B5563;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-edit:hover {
+    background-color: #374151;
+    color: #F3F4F6;
+}

@@ -204,6 +204,98 @@ async loadSkills() {
         }
     }
 
+    //-- NEW
+    groupHistoryByDays(history) {
+        const groups = {};
+        
+        history.forEach(item => {
+            // Получаем дату без времени
+            const datePart = item.timestamp.split('-')[0];
+            if (!groups[datePart]) {
+                groups[datePart] = [];
+            }
+            groups[datePart].push(item);
+        });
+        
+        // Сортируем даты в обратном порядке
+        return Object.entries(groups)
+            .sort(([dateA], [dateB]) => {
+                const [dayA, monthA, yearA] = dateA.split('.');
+                const [dayB, monthB, yearB] = dateB.split('.');
+                return new Date(yearB, monthB - 1, dayB) - new Date(yearA, monthA - 1, dayA);
+            });
+    }
+
+    async handleActivityEdit(historyId, activityId, notes) {
+        try {
+            const response = await fetch(`${SKILLS_SERVICE_URL}/${this.currentSkill.code}/history/${historyId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    activityId,
+                    notes
+                })
+            });
+            
+            if (!response.ok) throw new Error('Failed to update activity');
+            
+            // Обновляем данные навыка
+            this.currentSkill = await this.loadSkillDetails(this.currentSkill.code);
+            this.render();
+            this.hideEditActivityModal();
+        } catch (error) {
+            console.error('Error updating activity:', error);
+            alert('Произошла ошибка при обновлении активности');
+        }
+    }
+
+    showEditActivityModal(historyItem) {
+        const modal = document.getElementById('editActivityModal');
+        const form = document.getElementById('editActivityForm');
+        const activitySelect = form.querySelector('#editActivitySelect');
+        
+        // Заполняем список активностей
+        activitySelect.innerHTML = '<option value="">Выберите действие</option>';
+        Object.entries(this.activities)
+            .filter(([_, activity]) => activity.skill_code === this.currentSkill.code)
+            .forEach(([id, activity]) => {
+                const option = document.createElement('option');
+                option.value = id;
+                option.textContent = `${activity.name} (+${activity.points} очков)`;
+                option.selected = id === historyItem.activityId;
+                activitySelect.appendChild(option);
+            });
+        
+        // Заполняем заметки
+        form.querySelector('#editNotesInput').value = historyItem.notes;
+        
+        // Сохраняем ID записи для последующего обновления
+        form.dataset.historyId = historyItem.id;
+        
+        modal.style.display = 'block';
+    }
+
+    hideEditActivityModal() {
+        const modal = document.getElementById('editActivityModal');
+        modal.style.display = 'none';
+    }
+
+    toggleDayHistory(date) {
+        const content = document.querySelector(`#history-${date.replace(/\./g, '-')}`);
+        const icon = document.querySelector(`#icon-${date.replace(/\./g, '-')}`);
+        
+        if (content.style.display === 'none') {
+            content.style.display = 'block';
+            icon.textContent = '▼';
+        } else {
+            content.style.display = 'none';
+            icon.textContent = '▶';
+        }
+    }
+
+
     renderMainView() {
         this.backButton.style.display = 'none';
         this.pageTitle.textContent = 'Ментальный Трекер';
@@ -250,15 +342,49 @@ async loadSkills() {
         this.render();
     }
 
-
     renderSkillView() {
         const skill = this.currentSkill;
         const detail = document.createElement('div');
         detail.className = 'skill-detail';
         
-        // Проверяем значение прогресса
         const progress = typeof skill.progress === 'number' ? skill.progress : 0;
         
+        // Группируем историю по дням
+        const groupedHistory = this.groupHistoryByDays(skill.history);
+        
+        const historyHTML = groupedHistory.map(([date, items]) => {
+            const dateId = date.replace(/\./g, '-');
+            return `
+                <div class="history-day">
+                    <div class="day-header" onclick="app.toggleDayHistory('${date}')">
+                        <span id="icon-${dateId}">▼</span>
+                        <h3>${date}</h3>
+                        <span class="day-points">+${items.reduce((sum, item) => sum + item.points, 0)} очков</span>
+                    </div>
+                    <div id="history-${dateId}">
+                        ${items.map(item => {
+                            const activity = this.activities[item.activityId];
+                            return `
+                                <div class="history-item">
+                                    <div>
+                                        <h4>${activity ? activity.name : 'Активность'}</h4>
+                                        <p class="notes">${item.notes}</p>
+                                        <p class="timestamp">${item.timestamp.split('-')[1]}</p>
+                                    </div>
+                                    <div class="history-item-actions">
+                                        <span class="points-badge">+${item.points} очков</span>
+                                        <button class="btn btn-edit" onclick="app.showEditActivityModal(${JSON.stringify(item).replace(/"/g, '&quot;')})">
+                                            ✎
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
         detail.innerHTML = `
             <div class="skill-header">
                 <div>
@@ -282,25 +408,69 @@ async loadSkills() {
             
             <h3>История</h3>
             <div class="history-list">
-                ${skill.history.map(item => {
-                    const activity = this.activities[item.activityId];
-                    return `
-                        <div class="history-item">
-                            <div>
-                                <h4>${activity ? activity.name : 'Активность'}</h4>
-                                <p class="notes">${item.notes}</p>
-                                <p class="timestamp">${item.timestamp}</p>
-                            </div>
-                            <span class="points-badge">+${item.points} очков</span>
-                        </div>
-                    `;
-                }).join('')}
+                ${historyHTML}
             </div>
         `;
         
         this.mainContent.innerHTML = '';
         this.mainContent.appendChild(detail);
     }
+    //-- END NEW
+
+    
+    // renderSkillView() {
+    //     const skill = this.currentSkill;
+    //     const detail = document.createElement('div');
+    //     detail.className = 'skill-detail';
+        
+    //     // Проверяем значение прогресса
+    //     const progress = typeof skill.progress === 'number' ? skill.progress : 0;
+        
+    //     detail.innerHTML = `
+    //         <div class="skill-header">
+    //             <div>
+    //                 <div class="skill-icon">
+    //                     ${this.getSkillIcon(skill.code)}
+    //                 </div>
+    //                 <h2>Уровень ${skill.level}</h2>
+    //                 <p>До следующего уровня: ${progress}% (${skill.currentPoints}) очков</p>
+    //             </div>
+    //             <button class="btn btn-primary" onclick="app.showAddActivityModal()">
+    //                 + Добавить активность
+    //             </button>
+    //             <button class="btn btn-primary" onclick="app.showNewActivityModal()">
+    //                 + Создать активность
+    //             </button>
+    //         </div>
+            
+    //         <div class="progress-bar">
+    //             <div class="progress-fill" style="width: ${progress}%"></div>
+    //         </div>
+            
+    //         <h3>История</h3>
+    //         <div class="history-list">
+    //             ${skill.history.map(item => {
+    //                 const activity = this.activities[item.activityId];
+    //                 return `
+    //                     <div class="history-item">
+    //                         <div>
+    //                             <h4>${activity ? activity.name : 'Активность'}</h4>
+    //                             <p class="notes">${item.notes}</p>
+    //                             <p class="timestamp">${item.timestamp}</p>
+    //                         </div>
+    //                         <span class="points-badge">+${item.points} очков</span>
+    //                     </div>
+    //                 `;
+    //             }).join('')}
+    //         </div>
+    //     `;
+        
+    //     this.mainContent.innerHTML = '';
+    //     this.mainContent.appendChild(detail);
+    // }
+
+
+
     showMainView() {
         this.currentView = 'main';
         this.currentSkill = null;

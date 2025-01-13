@@ -217,6 +217,46 @@ app.post('/skills-raw', async (req, res) => {
 });
 
 
+app.put('/skills/:skillCode/history/:historyId', async (req, res) => {
+    try {
+        const { skillCode, historyId } = req.params;
+        const { activityId, notes } = req.body;
+
+        // Получаем текущую историю
+        const historyData = await data.readHistoryData();
+        const skillHistory = historyData.skills[skillCode];
+
+        // Находим запись для обновления
+        const recordIndex = skillHistory.history.findIndex(record => record.id === historyId);
+        if (recordIndex === -1) {
+            throw new Error('История не найдена');
+        }
+
+        // Получаем информацию о новой активности
+        const activities = await data.getActivities();
+        const activity = activities[activityId];
+
+        if (!activity) {
+            throw new Error('Активность не найдена');
+        }
+
+        // Обновляем запись
+        skillHistory.history[recordIndex] = {
+            ...skillHistory.history[recordIndex],
+            activityId,
+            points: activity.points,
+            notes
+        };
+
+        // Сохраняем обновленную историю
+        await data.writeHistoryData(historyData);
+
+        res.json({ success: true });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
 // Обновим маршрут для редактора
 app.get('/editor', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'json_editor.html'));
@@ -225,6 +265,10 @@ app.get('/editor', (req, res) => {
 app.get('/ping', (req, res) => {
     res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+
+
+
+
 
 app.listen(port, () => {
     console.log(`Сервер запущен на порту ${port}`);
