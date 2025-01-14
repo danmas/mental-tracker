@@ -54,7 +54,38 @@ async function addPoints(skillCode, points) {
     }
 }
 
+async function recalculateSkillProgress(skillCode) {
+    try {
+        const skillHistory = await data.getSkillHistory(skillCode);
+        if (!skillHistory) {
+            throw new Error(`История для навыка ${skillCode} не найдена`);
+        }
+
+        // Суммируем все очки из истории
+        const totalPoints = skillHistory.reduce((sum, record) => sum + record.points, 0);
+
+        // Получаем новый уровень и прогресс
+        const levelData = await calculateLevel(totalPoints);
+
+        // Обновляем данные в истории
+        const historyData = await data.readHistoryData();
+        historyData.skills[skillCode].currentPoints = totalPoints;
+        historyData.skills[skillCode].level = levelData.level;
+        historyData.skills[skillCode].progress = levelData.progress;
+
+        await data.writeHistoryData(historyData);
+
+        return {
+            totalPoints,
+            ...levelData
+        };
+    } catch (error) {
+        throw error;
+    }
+}
+
 module.exports = {
     calculateLevel,
-    addPoints
+    addPoints,
+    recalculateSkillProgress
 };

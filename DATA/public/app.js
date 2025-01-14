@@ -119,12 +119,44 @@ class MentalTracker {
         modal.style.display = 'none';
     }
 
+    
+    // async handleActivitySubmit(event) {
+    //     event.preventDefault();
+        
+    //     const form = event.target;
+    //     const activityId = form.activity.value;
+    //     const notes = form.notes.value;
+
+    //     if (!activityId) {
+    //         alert('Пожалуйста, выберите действие');
+    //         return;
+    //     }
+
+    //     try {
+    //         await this.addActivity(this.currentSkill.code, activityId, notes);
+    //         this.hideAddActivityModal();
+            
+    //         // Обновляем данные навыка
+    //         this.currentSkill = await this.loadSkillDetails(this.currentSkill.code);
+    //         this.render();
+    //     } catch (error) {
+    //         console.error('Error adding activity:', error);
+    //         alert('Произошла ошибка при добавлении активности');
+    //     }
+    // }
+
+    // newActivityModal
+
     async handleActivitySubmit(event) {
         event.preventDefault();
-        
+
         const form = event.target;
+        const historyId = form.historyId.value;
         const activityId = form.activity.value;
         const notes = form.notes.value;
+        const date = form.date.value;
+        const time = form.time.value;
+        const points = form.points.value;
 
         if (!activityId) {
             alert('Пожалуйста, выберите действие');
@@ -132,19 +164,51 @@ class MentalTracker {
         }
 
         try {
-            await this.addActivity(this.currentSkill.code, activityId, notes);
-            this.hideAddActivityModal();
-            
+            let response;
+            if (historyId) {
+                // Режим редактирования
+                response = await fetch(`${SKILLS_SERVICE_URL}/${this.currentSkill.code}/history/${historyId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        activityId,
+                        notes,
+                        points: parseInt(points),
+                        timestamp: this.formatDateTime(date, time)
+                    })
+                });
+            } else {
+                // Режим добавления
+                response = await fetch(`${SKILLS_SERVICE_URL}/${this.currentSkill.code}/history`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        activityId,
+                        notes,
+                        points: parseInt(points),
+                        timestamp: this.formatDateTime(date, time)
+                    })
+                });
+            }
+
+            if (!response.ok) {
+                throw new Error('Failed to submit activity');
+            }
+
             // Обновляем данные навыка
             this.currentSkill = await this.loadSkillDetails(this.currentSkill.code);
             this.render();
+            this.hideActivityFormModal();
         } catch (error) {
-            console.error('Error adding activity:', error);
-            alert('Произошла ошибка при добавлении активности');
+            console.error('Error submitting activity:', error);
+            alert('Произошла ошибка при добавлении/редактировании активности');
         }
     }
 
-    // newActivityModal
 
     showNewActivityModal() {
         const modal = document.getElementById('newActivityModal');

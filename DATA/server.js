@@ -57,6 +57,50 @@ app.get('/activities', async (req, res) => {
 
 // --- POST запросы ---
 
+// app.post('/skills/:skillCode/history', async (req, res) => {
+//     try {
+//         const skillCode = req.params.skillCode;
+//         const { activityId, notes } = req.body;
+
+//         // Получаем информацию об активности из справочника
+//         const activities = await data.getActivities();
+//         const activity = activities[activityId];
+
+//         if (!activity) {
+//             throw new Error(`Активность с id ${activityId} не найдена`);
+//         }
+
+//         // Проверяем, соответствует ли активность навыку
+//         if (activity.skill_code !== skillCode) {
+//             throw new Error(`Активность ${activityId} не соответствует навыку ${skillCode}`);
+//         }
+
+//         // Преобразуем points в число
+//         const points = parseInt(activity.points) || 0;
+
+//         // Создаем запись для истории
+//         const record = {
+//             activityId,
+//             name: activity.name,
+//             description: activity.description,
+//             points: points, // Теперь здесь гарантированно число
+//             notes
+//         };
+
+//         const newRecord = await data.addHistoryRecord(skillCode, record);
+
+//         // Добавляем очки за активность
+//         const pointsResult = await game.addPoints(skillCode, points);
+
+//         res.status(201).json({ 
+//             record: newRecord, 
+//             points: pointsResult 
+//         });
+//     } catch (error) {
+//         res.status(400).json({ error: error.message });
+//     }
+// });
+
 app.post('/skills/:skillCode/history', async (req, res) => {
     try {
         const skillCode = req.params.skillCode;
@@ -89,13 +133,55 @@ app.post('/skills/:skillCode/history', async (req, res) => {
 
         const newRecord = await data.addHistoryRecord(skillCode, record);
 
-        // Добавляем очки за активность
-        const pointsResult = await game.addPoints(skillCode, points);
+        // Пересчитываем прогресс навыка
+        const progressResult = await game.recalculateSkillProgress(skillCode);
 
         res.status(201).json({ 
             record: newRecord, 
-            points: pointsResult 
+            points: progressResult 
         });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
+
+app.put('/skills/:skillCode/history/:historyId', async (req, res) => {
+    try {
+        const { skillCode, historyId } = req.params;
+        const { activityId, notes, timestamp, points } = req.body;
+
+        // Получаем текущую историю
+        const historyData = await data.readHistoryData();
+        const skillHistory = historyData.skills[skillCode];
+
+        // Находим запись для обновления
+        const recordIndex = skillHistory.history.findIndex(record => record.id === historyId);
+        if (recordIndex === -1) {
+            throw new Error('История не найдена');
+        }
+
+        // Обновляем запись
+        skillHistory.history[recordIndex] = {
+            ...skillHistory.history[recordIndex],
+            activityId,
+            points: parseInt(points),
+            notes,
+            timestamp
+        };
+
+        // Сохраняем обновленную историю
+        await data.writeHistoryData(historyData);
+
+        // Пересчитываем прогресс навыка
+        const progressResult = await game.recalculateSkillProgress(skillCode);
+
+        // Пересортируем историю после обновления даты
+        skillHistory.history.sort((a, b) => {
+            return dateUtils.parseDate(b.timestamp) - dateUtils.parseDate(a.timestamp);
+        });
+
+        res.json({ success: true, points: progressResult });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
@@ -219,54 +305,102 @@ app.post('/skills-raw', async (req, res) => {
 });
 
 
-app.put('/skills/:skillCode/history/:historyId', async (req, res) => {
-    try {
-        const { skillCode, historyId } = req.params;
-        const { activityId, notes, timestamp, points } = req.body;
+// app.put('/skills/:skillCode/history/:historyId', async (req, res) => {
+//     try {
+//         const { skillCode, historyId } = req.params;
+//         const { activityId, notes, timestamp, points } = req.body;
 
-        // Получаем текущую историю
-        const historyData = await data.readHistoryData();
-        const skillHistory = historyData.skills[skillCode];
+//         // Получаем текущую историю
+//         const historyData = await data.readHistoryData();
+//         const skillHistory = historyData.skills[skillCode];
 
-        // Находим запись для обновления
-        const recordIndex = skillHistory.history.findIndex(record => record.id === historyId);
-        if (recordIndex === -1) {
-            throw new Error('История не найдена');
-        }
+//         // Находим запись для обновления
+//         const recordIndex = skillHistory.history.findIndex(record => record.id === historyId);
+//         if (recordIndex === -1) {
+//             throw new Error('История не найдена');
+//         }
 
-        // Получаем старые очки для пересчета общего количества
-        const oldPoints = skillHistory.history[recordIndex].points;
-        const pointsDiff = points - oldPoints;
+//         // Получаем старые очки для пересчета общего количества
+//         const oldPoints = skillHistory.history[recordIndex].points;
+//         const pointsDiff = points - oldPoints;
 
-        // Обновляем запись
-        skillHistory.history[recordIndex] = {
-            ...skillHistory.history[recordIndex],
-            activityId,
-            points: points,
-            notes,
-            timestamp
-        };
+//         // Обновляем запись
+//         skillHistory.history[recordIndex] = {
+//             ...skillHistory.history[recordIndex],
+//             activityId,
+//             points: points,
+//             notes,
+//             timestamp
+//         };
 
-        // Если очки изменились, обновляем общее количество очков
-        if (pointsDiff !== 0) {
-            await game.addPoints(skillCode, pointsDiff);
-        }
+//         // Если очки изменились, обновляем общее количество очков
+//         if (pointsDiff !== 0) {
+//             await game.addPoints(skillCode, pointsDiff);
+//         }
 
-        // Сохраняем обновленную историю
-        await data.writeHistoryData(historyData);
+//         // Сохраняем обновленную историю
+//         await data.writeHistoryData(historyData);
 
-        // Пересортируем историю после обновления даты
-        skillHistory.history.sort((a, b) => {
-            return dateUtils.parseDate(b.timestamp) - dateUtils.parseDate(a.timestamp);
-        });
+//         // Пересортируем историю после обновления даты
+//         skillHistory.history.sort((a, b) => {
+//             return dateUtils.parseDate(b.timestamp) - dateUtils.parseDate(a.timestamp);
+//         });
 
-        res.json({ success: true });
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-});
+//         res.json({ success: true });
+//     } catch (error) {
+//         res.status(400).json({ error: error.message });
+//     }
+// });
 
 // Обновим маршрут для редактора
+// app.put('/skills/:skillCode/history/:historyId', async (req, res) => {
+//     try {
+//         const { skillCode, historyId } = req.params;
+//         const { activityId, notes, timestamp, points } = req.body;
+
+//         // Получаем текущую историю
+//         const historyData = await data.readHistoryData();
+//         const skillHistory = historyData.skills[skillCode];
+
+//         // Находим запись для обновления
+//         const recordIndex = skillHistory.history.findIndex(record => record.id === historyId);
+//         if (recordIndex === -1) {
+//             throw new Error('История не найдена');
+//         }
+
+//         // Получаем старые очки для пересчета общего количества
+//         const oldPoints = skillHistory.history[recordIndex].points;
+//         const pointsDiff = points - oldPoints;
+
+//         // Обновляем запись
+//         skillHistory.history[recordIndex] = {
+//             ...skillHistory.history[recordIndex],
+//             activityId,
+//             points: parseInt(points),
+//             notes,
+//             timestamp
+//         };
+
+//         // Если очки изменились, обновляем общее количество очков
+//         if (pointsDiff !== 0) {
+//             await game.addPoints(skillCode, pointsDiff);
+//         }
+
+//         // Сохраняем обновленную историю
+//         await data.writeHistoryData(historyData);
+
+//         // Пересортируем историю после обновления даты
+//         skillHistory.history.sort((a, b) => {
+//             return dateUtils.parseDate(b.timestamp) - dateUtils.parseDate(a.timestamp);
+//         });
+
+//         res.json({ success: true });
+//     } catch (error) {
+//         res.status(400).json({ error: error.message });
+//     }
+// });
+
+
 app.get('/editor', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'json_editor.html'));
 });
