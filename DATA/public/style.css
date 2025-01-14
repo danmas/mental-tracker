@@ -9,7 +9,7 @@
 }
 
 /* Модальное окно */
-.modal-overlay {
+/* .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -30,7 +30,7 @@
     width: 100%;
     max-width: 500px;
     position: relative;
-}
+} */
 
 .modal-header {
     display: flex;
@@ -180,14 +180,14 @@ body {
 }
 
 /* Модальное окно */
-.modal {
+/* .modal {
     background-color: #1F2937;
     border: 1px solid #374151;
     border-radius: 0.5rem;
     padding: 1rem;  /* Уменьшили padding */
     width: 90%;
     max-width: 450px;  /* Уменьшили максимальную ширину */
-}
+} */
 
 .modal-header {
     margin-bottom: 1rem;  /* Уменьшили отступ */
@@ -413,4 +413,51 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 
 .btn-edit:hover {
     color: #0056b3;
+}
+
+
+/* Модальное окно */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal {
+    background-color: #1F2937;
+    border: 1px solid #374151;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 500px;
+    position: relative;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    cursor: grab; /* Добавляем курсор grab */
+    padding: 0.75rem 1rem; /* Увеличиваем padding */
+    user-select: none; /* Запрещаем выделение текста */
+    transition: background-color 0.2s ease; /* Плавный переход фона */
+}
+
+.modal-header:hover {
+    background-color: #374151; /* Легкий фон при наведении */
+}
+
+.modal-header:active {
+    cursor: grabbing; /* Меняем курсор при перетаскивании */
 }
