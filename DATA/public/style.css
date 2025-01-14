@@ -357,3 +357,60 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     filter: invert(1);
     cursor: pointer;
 }
+
+
+/* FROM CHAT GPT */
+
+.history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.history-item-main {
+    flex-grow: 1;
+    padding-right: 10px;
+}
+
+.history-name {
+    font-size: 16px;
+    font-weight: bold;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.history-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.points-badge {
+    background-color: #4caf50;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 12px;
+    font-size: 14px;
+}
+
+.timestamp {
+    font-size: 14px;
+    color: #666;
+}
+
+.btn-edit {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: #007bff;
+}
+
+.btn-edit:hover {
+    color: #0056b3;
+}
