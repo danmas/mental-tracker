@@ -456,11 +456,6 @@ groupHistoryByDays(history) {
 //     modal.style.display = 'none';
 // }
 
-// {/* <button class="btn btn-edit" onclick="app.showActivityFormModal({&quot;id&quot;:&quot;act_1736836032773&quot;,&quot;activityId&quot;:&quot;morning_exercise&quot;,&quot;name&quot;:&quot;Утренняя зарядка&quot;,&quot;description&quot;:&quot;Простые упражнения для зарядки. Каждое утро.&quot;,&quot;points&quot;:1,&quot;notes&quot;:&quot;&quot;,&quot;timestamp&quot;:&quot;14.01.2025-06:27:12&quot;})">
-//                                         ✎
-//                                     </button> */}
-
-
 
 showActivityFormModal(historyItemString = null) {
     const modal = document.getElementById('activityFormModal');
@@ -639,6 +634,30 @@ toggleDayHistory(date) {
     }
 }
 
+
+    async handleActivityDelete(historyId) {
+        if (!confirm('Вы уверены, что хотите удалить эту активность?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`${SKILLS_SERVICE_URL}/${this.currentSkill.code}/history/${historyId}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete activity');
+            }
+
+            // Обновляем данные навыка
+            this.currentSkill = await this.loadSkillDetails(this.currentSkill.code);
+            this.render();
+        } catch (error) {
+            console.error('Error deleting activity:', error);
+            alert('Произошла ошибка при удалении активности');
+        }
+    }
+
 renderSkillView() {
     const skill = this.currentSkill;
     const detail = document.createElement('div');
@@ -673,6 +692,9 @@ renderSkillView() {
                                     <button class="btn btn-edit" onclick="app.showActivityFormModal(${JSON.stringify(item).replace(/"/g, '&quot;')})">
                                         ✎
                                     </button>
+        <button class="btn btn-delete" onclick="app.handleActivityDelete('${item.id}')">
+            🗑️
+        </button>                                    
                                 </div>
                             </div>
                         `;
