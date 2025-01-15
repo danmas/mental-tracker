@@ -6,53 +6,63 @@ class MentalTracker {
     constructor() {
         this.currentView = 'main';
         this.currentSkill = null;
-        
+
         // DOM элементы
         this.mainContent = document.getElementById('mainContent');
         this.backButton = document.getElementById('backButton');
         this.pageTitle = document.getElementById('pageTitle');
-        
+
         // Привязка обработчиков
         this.backButton.addEventListener('click', () => this.showMainView());
 
 
-        // constructor() {
-            // ... существующий код ...
-    
-            this.modalDrag = {
-                element: null,
-                offsetX: 0,
-                offsetY: 0,
-                isDragging: false
-            };
-    
-            document.addEventListener('mousedown', (e) => this.handleModalMouseDown(e));
-            document.addEventListener('mousemove', (e) => this.handleModalMouseMove(e));
-            document.addEventListener('mouseup', (e) => this.handleModalMouseUp(e));
-        }
-    
-        handleModalMouseDown(e) {
-            if (e.target.classList.contains('modal-header')) {
-                this.modalDrag.element = e.target.closest('.modal');
-                if (this.modalDrag.element) {
-                    this.modalDrag.offsetX = e.clientX - this.modalDrag.element.offsetLeft;
-                    this.modalDrag.offsetY = e.clientY - this.modalDrag.element.offsetTop;
-                    this.modalDrag.isDragging = true;
-                }
+        // ... существующий код ...
+
+        this.modalDrag = {
+            element: null,
+            offsetX: 0,
+            offsetY: 0,
+            isDragging: false
+        };
+
+        document.addEventListener('mousedown', (e) => this.handleModalMouseDown(e));
+        document.addEventListener('mousemove', (e) => this.handleModalMouseMove(e));
+        document.addEventListener('mouseup', (e) => this.handleModalMouseUp(e));
+
+        this.loadingOverlay = document.getElementById('loadingOverlay');
+    }
+
+    showLoading() {
+        this.loadingOverlay.style.display = 'flex';
+    }
+
+    hideLoading() {
+        this.loadingOverlay.style.display = 'none';
+    }
+
+
+    handleModalMouseDown(e) {
+        if (e.target.classList.contains('modal-header')) {
+            this.modalDrag.element = e.target.closest('.modal');
+            if (this.modalDrag.element) {
+                this.modalDrag.offsetX = e.clientX - this.modalDrag.element.offsetLeft;
+                this.modalDrag.offsetY = e.clientY - this.modalDrag.element.offsetTop;
+                this.modalDrag.isDragging = true;
             }
         }
-    
-        handleModalMouseMove(e) {
-            if (this.modalDrag.isDragging && this.modalDrag.element) {
-                this.modalDrag.element.style.left = `${e.clientX - this.modalDrag.offsetX}px`;
-                this.modalDrag.element.style.top = `${e.clientY - this.modalDrag.offsetY}px`;
-            }
+    }
+
+    handleModalMouseMove(e) {
+        if (this.modalDrag.isDragging && this.modalDrag.element) {
+            this.modalDrag.element.style.left = `${e.clientX - this.modalDrag.offsetX}px`;
+            this.modalDrag.element.style.top = `${e.clientY - this.modalDrag.offsetY}px`;
         }
-    
-        handleModalMouseUp(e) {
-            this.modalDrag.isDragging = false;
-            this.modalDrag.element = null;
-        }        
+    }
+
+    handleModalMouseUp(e) {
+        this.modalDrag.isDragging = false;
+        this.modalDrag.element = null;
+    }
     //}
 
     // async init() {
@@ -71,7 +81,7 @@ class MentalTracker {
     }
 
     async loadActivities() {
-        try { 
+        try {
             //const response = await fetch('http://localhost:3050/activities');
             const response = await fetch('/activities');
             this.activities = await response.json();
@@ -98,10 +108,10 @@ class MentalTracker {
     showAddActivityModal() {
         const modal = document.getElementById('activityModal');
         const activitySelect = document.getElementById('activitySelect');
-        
+
         // Очищаем и заполняем список активностей
         activitySelect.innerHTML = '<option value="">Выберите действие</option>';
-        
+
         Object.entries(this.activities)
             .filter(([_, activity]) => activity.skill_code === this.currentSkill.code)
             .forEach(([id, activity]) => {
@@ -110,7 +120,7 @@ class MentalTracker {
                 option.textContent = `${activity.name} (+${activity.points} очков)`;
                 activitySelect.appendChild(option);
             });
-        
+
         modal.style.display = 'block';
     }
 
@@ -119,10 +129,10 @@ class MentalTracker {
         modal.style.display = 'none';
     }
 
-    
+
     // async handleActivitySubmit(event) {
     //     event.preventDefault();
-        
+
     //     const form = event.target;
     //     const activityId = form.activity.value;
     //     const notes = form.notes.value;
@@ -135,7 +145,7 @@ class MentalTracker {
     //     try {
     //         await this.addActivity(this.currentSkill.code, activityId, notes);
     //         this.hideAddActivityModal();
-            
+
     //         // Обновляем данные навыка
     //         this.currentSkill = await this.loadSkillDetails(this.currentSkill.code);
     //         this.render();
@@ -228,7 +238,7 @@ class MentalTracker {
 
     async handleNewActivitySubmit(event) {
         event.preventDefault();
-        
+
         const form = event.target;
         //const activityId = form.activity.value;
         //const notes = form.notes.value;
@@ -276,27 +286,34 @@ class MentalTracker {
     }
 
 
-//
-// Функции для работы с сервисом настроек
-//    
-async loadSkills() {
-    try {
-        const response = await fetch(`${SKILLS_SERVICE_URL}`);
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
+    //
+    // Функции для работы с сервисом настроек
+    //    
+    async loadSkills() {
+        this.showLoading();
+        try {
+            const response = await fetch(`${SKILLS_SERVICE_URL}`);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            this.skills = data;
+        } catch (error) {
+            console.error('Error loading skills:', error);
+            this.skills = [];
+        } finally {
+            this.hideLoading();
         }
-        const data = await response.json();
-        // console.log('Loaded skills data:', data);  // Отладочный вывод
-        this.skills = data;
-    } catch (error) {
-        console.error('Error loading skills:', error);
-        this.skills = [];
     }
-}
 
     async loadSkillDetails(code) {
-        const response = await fetch(`${SKILLS_SERVICE_URL}/${code}`);
-        return await response.json();
+        this.showLoading();
+        try {
+            const response = await fetch(`${SKILLS_SERVICE_URL}/${code}`);
+            return await response.json();
+        } finally {
+            this.hideLoading();
+        }
     }
 
     render() {
@@ -311,10 +328,10 @@ async loadSkills() {
     renderMainView() {
         this.backButton.style.display = 'none';
         this.pageTitle.textContent = 'Ментальный Трекер';
-        
+
         const grid = document.createElement('div');
         grid.className = 'skills-grid';
-        
+
         grid.innerHTML = this.skills.map(skill => `
             <div class="skill-card">
                 <div class="skill-header">
@@ -335,13 +352,13 @@ async loadSkills() {
                 </button>
             </div>
         `).join('');
-        
+
         grid.addEventListener('click', (e) => {
             if (e.target.classList.contains('details-button')) {
                 this.showSkillView(e.target.dataset.code);
             }
         });
-        
+
         this.mainContent.innerHTML = '';
         this.mainContent.appendChild(grid);
     }
@@ -356,283 +373,287 @@ async loadSkills() {
 
 
 
-//-- NEW-3 
-// Добавим новые методы в класс MentalTracker
-groupHistoryByDays(history) {
-    const groups = {};
-    
-    history.forEach(item => {
-        // Получаем дату без времени
-        const datePart = item.timestamp.split('-')[0];
-        if (!groups[datePart]) {
-            groups[datePart] = [];
-        }
-        groups[datePart].push(item);
-    });
-    
-    // Сортируем даты в обратном порядке
-    return Object.entries(groups)
-        .sort(([dateA], [dateB]) => {
-            const [dayA, monthA, yearA] = dateA.split('.');
-            const [dayB, monthB, yearB] = dateB.split('.');
-            return new Date(yearB, monthB - 1, dayB) - new Date(yearA, monthA - 1, dayA);
-        });
-}
+    //-- NEW-3 
+    // Добавим новые методы в класс MentalTracker
+    groupHistoryByDays(history) {
+        const groups = {};
 
-// async handleActivityEdit(historyId, activityId, notes, date, time, points) {
-//     try {
-//         const response = await fetch(`${SKILLS_SERVICE_URL}/${this.currentSkill.code}/history/${historyId}`, {
-//             method: 'PUT',
-//             headers: {
-//                 'Content-Type': 'application/json'
-//             },
-//             body: JSON.stringify({
-//                 activityId,
-//                 notes,
-//                 points: parseInt(points),
-//                 timestamp: this.formatDateTime(date, time)
-//             })
-//         });
-        
-//         if (!response.ok) throw new Error('Failed to update activity');
-        
-//         // Получаем обновленные данные навыка
-//         const skillData = await this.loadSkillDetails(this.currentSkill.code);
-        
-//         // Обновляем текущий навык новыми данными
-//         this.currentSkill = skillData;
-        
-//         // Обновляем общий список навыков
-//         await this.loadSkills();
-        
-//         // Обновляем отображение
-//         this.render();
-//         this.hideEditActivityModal();
-//     } catch (error) {
-//         console.error('Error updating activity:', error);
-//         alert('Произошла ошибка при обновлении активности');
-//     }
-// }
-
-// showEditActivityModal(historyItem) {
-//     const modal = document.getElementById('editActivityModal');
-//     const form = document.getElementById('editActivityForm');
-//     const activitySelect = form.querySelector('#editActivitySelect');
-    
-//     // Заполняем список активностей
-//     activitySelect.innerHTML = '<option value="">Выберите действие</option>';
-//     Object.entries(this.activities)
-//         .filter(([_, activity]) => activity.skill_code === this.currentSkill.code)
-//         .forEach(([id, activity]) => {
-//             const option = document.createElement('option');
-//             option.value = id;
-//             option.textContent = `${activity.name} (+${activity.points} очков)`;
-//             option.selected = id === historyItem.activityId;
-//             activitySelect.appendChild(option);
-//         });
-    
-//     // Заполняем заметки
-//     form.querySelector('#editNotesInput').value = historyItem.notes;
-    
-//     // Заполняем очки
-//     form.querySelector('#editPointsInput').value = historyItem.points;
-    
-//     // Заполняем дату и время
-//     const [datePart, timePart] = historyItem.timestamp.split('-');
-//     const [day, month, year] = datePart.split('.');
-//     const [hours, minutes, seconds] = timePart ? timePart.split(':') : ['00', '00', '00'];
-    
-//     form.querySelector('#editDateInput').value = `${year}-${month}-${day}`;
-//     form.querySelector('#editTimeInput').value = `${hours}:${minutes}`;
-    
-//     // Сохраняем ID записи для последующего обновления
-//     form.dataset.historyId = historyItem.id;
-    
-//     modal.style.display = 'block';
-// }
-
-// hideEditActivityModal() {
-//     const modal = document.getElementById('editActivityModal');
-//     modal.style.display = 'none';
-// }
-
-
-showActivityFormModal(historyItemString = null) {
-    const modal = document.getElementById('activityFormModal');
-    const form = document.getElementById('activityForm');
-    const activitySelect = document.getElementById('activitySelect');
-    const modalTitle = document.getElementById('activityModalTitle');
-    const historyIdInput = form.querySelector('#historyId');
-    const pointsInput = form.querySelector('#pointsInput');
-    const dateInput = form.querySelector('#dateInput');
-    const timeInput = form.querySelector('#timeInput');
-
-    // Очищаем и заполняем список активностей
-    activitySelect.innerHTML = '<option value="">Выберите действие</option>';
-    Object.entries(this.activities)
-        .filter(([_, activity]) => activity.skill_code === this.currentSkill.code)
-        .forEach(([id, activity]) => {
-            const option = document.createElement('option');
-            option.value = id;
-            option.textContent = `${activity.name} (+${activity.points} очков)`;
-            activitySelect.appendChild(option);
-        });
-
-    // Сбрасываем форму
-    form.reset();
-
-    let historyItem = null;
-    if (historyItemString) {
-        historyItem = historyItemString;
-    }
-
-    if (historyItem) {
-        // Режим редактирования
-        modalTitle.textContent = 'Редактировать активность';
-        if (historyIdInput) {
-            historyIdInput.value = historyItem.id;
-        }
-        activitySelect.value = historyItem.activityId;
-        form.querySelector('#notesInput').value = historyItem.notes;
-        if (pointsInput && historyItem.points !== undefined) {
-            pointsInput.value = historyItem.points;
-        }
-
-        if (dateInput && historyItem.timestamp) {
-            const [datePart, timePart] = historyItem.timestamp.split('-');
-            if (datePart) {
-                const [day, month, year] = datePart.split('.');
-                if (day && month && year) {
-                    dateInput.value = `${year}-${month}-${day}`;
-                }
+        history.forEach(item => {
+            // Получаем дату без времени
+            const datePart = item.timestamp.split('-')[0];
+            if (!groups[datePart]) {
+                groups[datePart] = [];
             }
-            
-            const [hours, minutes, seconds] = timePart ? timePart.split(':') : ['00', '00', '00'];
-            timeInput.value = `${hours}:${minutes}`;
-        }
-    } else {
-        // Режим добавления
-        modalTitle.textContent = 'Добавить активность';
-        if (historyIdInput) {
-            historyIdInput.value = '';
-        }
+            groups[datePart].push(item);
+        });
 
-        // Устанавливаем текущую дату и время
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-
-        if (dateInput) {
-            dateInput.value = `${year}-${month}-${day}`;
-        }
-        if (timeInput) {
-            timeInput.value = `${hours}:${minutes}`;
-        }
-    }
-
-    modal.style.display = 'block';
-
-    // Обработчик изменения выбора активности
-    activitySelect.onchange = () => {
-        const selectedActivityId = activitySelect.value;
-        if (selectedActivityId && this.activities[selectedActivityId]) {
-            pointsInput.value = this.activities[selectedActivityId].points;
-        } else {
-            pointsInput.value = '';
-        }
-    };
-}
-
-
-hideActivityFormModal() {
-    const modal = document.getElementById('activityFormModal');
-    modal.style.display = 'none';
-}
-
-async handleActivitySubmit(event) {
-    event.preventDefault();
-
-    const form = event.target;
-    const historyId = form.historyId.value;
-    const activityId = form.activity.value;
-    const notes = form.notes.value;
-    const date = form.date.value;
-    const time = form.time.value;
-    const points = form.points.value;
-
-    if (!activityId) {
-        alert('Пожалуйста, выберите действие');
-        return;
-    }
-
-    try {
-        let response;
-        if (historyId) {
-            // Режим редактирования
-            response = await fetch(`${SKILLS_SERVICE_URL}/${this.currentSkill.code}/history/${historyId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    activityId,
-                    notes,
-                    points: parseInt(points),
-                    timestamp: this.formatDateTime(date, time)
-                })
+        // Сортируем даты в обратном порядке
+        return Object.entries(groups)
+            .sort(([dateA], [dateB]) => {
+                const [dayA, monthA, yearA] = dateA.split('.');
+                const [dayB, monthB, yearB] = dateB.split('.');
+                return new Date(yearB, monthB - 1, dayB) - new Date(yearA, monthA - 1, dayA);
             });
+    }
+
+    // async handleActivityEdit(historyId, activityId, notes, date, time, points) {
+    //     try {
+    //         const response = await fetch(`${SKILLS_SERVICE_URL}/${this.currentSkill.code}/history/${historyId}`, {
+    //             method: 'PUT',
+    //             headers: {
+    //                 'Content-Type': 'application/json'
+    //             },
+    //             body: JSON.stringify({
+    //                 activityId,
+    //                 notes,
+    //                 points: parseInt(points),
+    //                 timestamp: this.formatDateTime(date, time)
+    //             })
+    //         });
+
+    //         if (!response.ok) throw new Error('Failed to update activity');
+
+    //         // Получаем обновленные данные навыка
+    //         const skillData = await this.loadSkillDetails(this.currentSkill.code);
+
+    //         // Обновляем текущий навык новыми данными
+    //         this.currentSkill = skillData;
+
+    //         // Обновляем общий список навыков
+    //         await this.loadSkills();
+
+    //         // Обновляем отображение
+    //         this.render();
+    //         this.hideEditActivityModal();
+    //     } catch (error) {
+    //         console.error('Error updating activity:', error);
+    //         alert('Произошла ошибка при обновлении активности');
+    //     }
+    // }
+
+    // showEditActivityModal(historyItem) {
+    //     const modal = document.getElementById('editActivityModal');
+    //     const form = document.getElementById('editActivityForm');
+    //     const activitySelect = form.querySelector('#editActivitySelect');
+
+    //     // Заполняем список активностей
+    //     activitySelect.innerHTML = '<option value="">Выберите действие</option>';
+    //     Object.entries(this.activities)
+    //         .filter(([_, activity]) => activity.skill_code === this.currentSkill.code)
+    //         .forEach(([id, activity]) => {
+    //             const option = document.createElement('option');
+    //             option.value = id;
+    //             option.textContent = `${activity.name} (+${activity.points} очков)`;
+    //             option.selected = id === historyItem.activityId;
+    //             activitySelect.appendChild(option);
+    //         });
+
+    //     // Заполняем заметки
+    //     form.querySelector('#editNotesInput').value = historyItem.notes;
+
+    //     // Заполняем очки
+    //     form.querySelector('#editPointsInput').value = historyItem.points;
+
+    //     // Заполняем дату и время
+    //     const [datePart, timePart] = historyItem.timestamp.split('-');
+    //     const [day, month, year] = datePart.split('.');
+    //     const [hours, minutes, seconds] = timePart ? timePart.split(':') : ['00', '00', '00'];
+
+    //     form.querySelector('#editDateInput').value = `${year}-${month}-${day}`;
+    //     form.querySelector('#editTimeInput').value = `${hours}:${minutes}`;
+
+    //     // Сохраняем ID записи для последующего обновления
+    //     form.dataset.historyId = historyItem.id;
+
+    //     modal.style.display = 'block';
+    // }
+
+    // hideEditActivityModal() {
+    //     const modal = document.getElementById('editActivityModal');
+    //     modal.style.display = 'none';
+    // }
+
+
+    showActivityFormModal(historyItemString = null) {
+        const modal = document.getElementById('activityFormModal');
+        const form = document.getElementById('activityForm');
+        const activitySelect = document.getElementById('activitySelect');
+        const modalTitle = document.getElementById('activityModalTitle');
+        const historyIdInput = form.querySelector('#historyId');
+        const pointsInput = form.querySelector('#pointsInput');
+        const dateInput = form.querySelector('#dateInput');
+        const timeInput = form.querySelector('#timeInput');
+
+        // Очищаем и заполняем список активностей
+        activitySelect.innerHTML = '<option value="">Выберите действие</option>';
+        Object.entries(this.activities)
+            .filter(([_, activity]) => activity.skill_code === this.currentSkill.code)
+            .forEach(([id, activity]) => {
+                const option = document.createElement('option');
+                option.value = id;
+                option.textContent = `${activity.name} (+${activity.points} очков)`;
+                activitySelect.appendChild(option);
+            });
+
+        // Сбрасываем форму
+        form.reset();
+
+        let historyItem = null;
+        if (historyItemString) {
+            historyItem = historyItemString;
+        }
+
+        if (historyItem) {
+            // Режим редактирования
+            modalTitle.textContent = 'Редактировать активность';
+            if (historyIdInput) {
+                historyIdInput.value = historyItem.id;
+            }
+            activitySelect.value = historyItem.activityId;
+            form.querySelector('#notesInput').value = historyItem.notes;
+            if (pointsInput && historyItem.points !== undefined) {
+                pointsInput.value = historyItem.points;
+            }
+
+            if (dateInput && historyItem.timestamp) {
+                const [datePart, timePart] = historyItem.timestamp.split('-');
+                if (datePart) {
+                    const [day, month, year] = datePart.split('.');
+                    if (day && month && year) {
+                        dateInput.value = `${year}-${month}-${day}`;
+                    }
+                }
+
+                const [hours, minutes, seconds] = timePart ? timePart.split(':') : ['00', '00', '00'];
+                timeInput.value = `${hours}:${minutes}`;
+            }
         } else {
             // Режим добавления
-            response = await fetch(`${SKILLS_SERVICE_URL}/${this.currentSkill.code}/history`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    activityId,
-                    notes,
-                    points: parseInt(points),
-                    timestamp: this.formatDateTime(date, time)
-                })
-            });
+            modalTitle.textContent = 'Добавить активность';
+            if (historyIdInput) {
+                historyIdInput.value = '';
+            }
+
+            // Устанавливаем текущую дату и время
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+
+            if (dateInput) {
+                dateInput.value = `${year}-${month}-${day}`;
+            }
+            if (timeInput) {
+                timeInput.value = `${hours}:${minutes}`;
+            }
         }
 
-        if (!response.ok) {
-            throw new Error('Failed to submit activity');
+        modal.style.display = 'block';
+
+        // Обработчик изменения выбора активности
+        activitySelect.onchange = () => {
+            const selectedActivityId = activitySelect.value;
+            if (selectedActivityId && this.activities[selectedActivityId]) {
+                pointsInput.value = this.activities[selectedActivityId].points;
+            } else {
+                pointsInput.value = '';
+            }
+        };
+    }
+
+
+    hideActivityFormModal() {
+        const modal = document.getElementById('activityFormModal');
+        modal.style.display = 'none';
+    }
+
+    async handleActivitySubmit(event) {
+        event.preventDefault();
+        this.showLoading();
+
+        const form = event.target;
+        const historyId = form.historyId.value;
+        const activityId = form.activity.value;
+        const notes = form.notes.value;
+        const date = form.date.value;
+        const time = form.time.value;
+        const points = form.points.value;
+
+        if (!activityId) {
+            alert('Пожалуйста, выберите действие');
+            return;
         }
 
-        // Обновляем данные навыка
-        this.currentSkill = await this.loadSkillDetails(this.currentSkill.code);
-        this.render();
-        this.hideActivityFormModal();
-    } catch (error) {
-        console.error('Error submitting activity:', error);
-        alert('Произошла ошибка при добавлении/редактировании активности');
-    }
-}
+        try {
+            let response;
+            if (historyId) {
+                // Режим редактирования
+                response = await fetch(`${SKILLS_SERVICE_URL}/${this.currentSkill.code}/history/${historyId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        activityId,
+                        notes,
+                        points: parseInt(points),
+                        timestamp: this.formatDateTime(date, time)
+                    })
+                });
+            } else {
+                // Режим добавления
+                response = await fetch(`${SKILLS_SERVICE_URL}/${this.currentSkill.code}/history`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        activityId,
+                        notes,
+                        points: parseInt(points),
+                        timestamp: this.formatDateTime(date, time)
+                    })
+                });
+            }
 
-formatDateTime(date, time) {
-    // Преобразуем HTML5 input date (YYYY-MM-DD) в наш формат (DD.MM.YYYY-HH:MM:SS)
-    const [year, month, day] = date.split('-');
-    const [hours, minutes] = time.split(':');
-    return `${day}.${month}.${year}-${hours}:${minutes}:00`;
-}
+            if (!response.ok) {
+                throw new Error('Failed to submit activity');
+            }
 
-toggleDayHistory(date) {
-    const content = document.querySelector(`#history-${date.replace(/\./g, '-')}`);
-    const icon = document.querySelector(`#icon-${date.replace(/\./g, '-')}`);
-    
-    if (content.style.display === 'none') {
-        content.style.display = 'block';
-        icon.textContent = '▼';
-    } else {
-        content.style.display = 'none';
-        icon.textContent = '▶';
+            // Обновляем данные навыка
+            this.currentSkill = await this.loadSkillDetails(this.currentSkill.code);
+            this.render();
+            this.hideActivityFormModal();
+        } catch (error) {
+            console.error('Error submitting activity:', error);
+            alert('Произошла ошибка при добавлении/редактировании активности');
+        } finally {
+            this.hideLoading();
+        }
     }
-}
+
+
+    formatDateTime(date, time) {
+        // Преобразуем HTML5 input date (YYYY-MM-DD) в наш формат (DD.MM.YYYY-HH:MM:SS)
+        const [year, month, day] = date.split('-');
+        const [hours, minutes] = time.split(':');
+        return `${day}.${month}.${year}-${hours}:${minutes}:00`;
+    }
+
+    toggleDayHistory(date) {
+        const content = document.querySelector(`#history-${date.replace(/\./g, '-')}`);
+        const icon = document.querySelector(`#icon-${date.replace(/\./g, '-')}`);
+
+        if (content.style.display === 'none') {
+            content.style.display = 'block';
+            icon.textContent = '▼';
+        } else {
+            content.style.display = 'none';
+            icon.textContent = '▶';
+        }
+    }
 
 
     async handleActivityDelete(historyId) {
@@ -658,19 +679,19 @@ toggleDayHistory(date) {
         }
     }
 
-renderSkillView() {
-    const skill = this.currentSkill;
-    const detail = document.createElement('div');
-    detail.className = 'skill-detail';
-    
-    const progress = typeof skill.progress === 'number' ? skill.progress : 0;
-    
-    // Группируем историю по дням
-    const groupedHistory = this.groupHistoryByDays(skill.history);
-    
-    const historyHTML = groupedHistory.map(([date, items]) => {
-        const dateId = date.replace(/\./g, '-');
-        return `
+    renderSkillView() {
+        const skill = this.currentSkill;
+        const detail = document.createElement('div');
+        detail.className = 'skill-detail';
+
+        const progress = typeof skill.progress === 'number' ? skill.progress : 0;
+
+        // Группируем историю по дням
+        const groupedHistory = this.groupHistoryByDays(skill.history);
+
+        const historyHTML = groupedHistory.map(([date, items]) => {
+            const dateId = date.replace(/\./g, '-');
+            return `
             <div class="history-day">
                 <div class="day-header" onclick="app.toggleDayHistory('${date}')">
                     <span id="icon-${dateId}">▼</span>
@@ -679,9 +700,9 @@ renderSkillView() {
                 </div>
                 <div id="history-${dateId}">
                     ${items.map(item => {
-                        const activity = this.activities[item.activityId];
-                        return `
-                            <div class="history-item">
+                const activity = this.activities[item.activityId];
+                return `
+                         <div class="history-item">
                                 <div class="history-item-main">
                                     <h4>${activity ? activity.name : 'Активность'}</h4>
                                     <p class="notes">${item.notes}</p>
@@ -692,19 +713,38 @@ renderSkillView() {
                                     <button class="btn btn-edit" onclick="app.showActivityFormModal(${JSON.stringify(item).replace(/"/g, '&quot;')})">
                                         ✎
                                     </button>
-        <button class="btn btn-delete" onclick="app.handleActivityDelete('${item.id}')">
-            🗑️
-        </button>                                    
+                                    <button class="btn btn-edit btn-delete" onclick="app.handleActivityDelete('${item.id}')">
+                                        🗑️
+                                    </button>
                                 </div>
                             </div>
-                        `;
-                    }).join('')}
+                    `;
+            }).join('')}
                 </div>
             </div>
         `;
-    }).join('');
+        }).join('');
 
-    detail.innerHTML = `
+        /*
+        <div class="history-item">
+            <div class="history-item-main">
+                <h4>${activity ? activity.name : 'Активность'}</h4>
+                <p class="notes">${item.notes}</p>
+            </div>
+            <div class="history-item-actions">
+                <p class="timestamp">${item.timestamp.split('-')[1]}</p>
+                <span class="points-badge">+${item.points} очков</span>
+                <button class="btn btn-edit" onclick="app.showActivityFormModal(${JSON.stringify(item).replace(/"/g, '"')})">
+                    ✎
+                </button>
+                <button class="btn btn-edit btn-delete" onclick="app.handleActivityDelete('${item.id}')">
+                    🗑️
+                </button>
+            </div>
+        </div>    
+        */
+
+        detail.innerHTML = `
         <div class="skill-header">
             <div>
                 <div class="skill-icon">
@@ -730,11 +770,11 @@ renderSkillView() {
             ${historyHTML}
         </div>
     `;
-    
-    this.mainContent.innerHTML = '';
-    this.mainContent.appendChild(detail);
-}
-//-- NEW-3 END
+
+        this.mainContent.innerHTML = '';
+        this.mainContent.appendChild(detail);
+    }
+    //-- NEW-3 END
 
     showMainView() {
         this.currentView = 'main';
