@@ -299,9 +299,8 @@ async function addHistoryRecord(skillCode, record) {
             throw new Error(`Навык ${skillCode} не найден`);
         }
         const newRecord = {
-            id: `act_${Date.now()}`,
-            ...record,
-            timestamp: dateUtils.formatDate(new Date()) //new Date().toISOString()
+            id: `act_${Date.now()}`, // Уникальный ID для записи
+            ...record, // Используем переданные данные, включая timestamp
         };
         historyData.skills[skillCode].history.push(newRecord);
         await writeHistoryData(historyData);
@@ -310,7 +309,6 @@ async function addHistoryRecord(skillCode, record) {
         throw error;
     }
 }
-
 
 
 

@@ -60,7 +60,7 @@ app.get('/activities', async (req, res) => {
 app.post('/skills/:skillCode/history', async (req, res) => {
     try {
         const skillCode = req.params.skillCode;
-        const { activityId, notes } = req.body;
+        const { activityId, notes, timestamp } = req.body; // Получаем timestamp из тела запроса
 
         // Получаем информацию об активности из справочника
         const activities = await data.getActivities();
@@ -84,7 +84,8 @@ app.post('/skills/:skillCode/history', async (req, res) => {
             name: activity.name,
             description: activity.description,
             points: points, // Теперь здесь гарантированно число
-            notes
+            notes,
+            timestamp // Используем переданный timestamp
         };
 
         const newRecord = await data.addHistoryRecord(skillCode, record);

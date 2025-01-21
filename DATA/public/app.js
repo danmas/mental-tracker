@@ -159,20 +159,21 @@ class MentalTracker {
 
     async handleActivitySubmit(event) {
         event.preventDefault();
-
+        this.showLoading();
+    
         const form = event.target;
         const historyId = form.historyId.value;
         const activityId = form.activity.value;
         const notes = form.notes.value;
-        const date = form.date.value;
-        const time = form.time.value;
+        const date = form.date.value; // Получаем выбранную дату
+        const time = form.time.value; // Получаем выбранное время
         const points = form.points.value;
-
+    
         if (!activityId) {
             alert('Пожалуйста, выберите действие');
             return;
         }
-
+    
         try {
             let response;
             if (historyId) {
@@ -186,7 +187,7 @@ class MentalTracker {
                         activityId,
                         notes,
                         points: parseInt(points),
-                        timestamp: this.formatDateTime(date, time)
+                        timestamp: this.formatDateTime(date, time) // Используем выбранные дату и время
                     })
                 });
             } else {
@@ -200,15 +201,15 @@ class MentalTracker {
                         activityId,
                         notes,
                         points: parseInt(points),
-                        timestamp: this.formatDateTime(date, time)
+                        timestamp: this.formatDateTime(date, time) // Используем выбранные дату и время
                     })
                 });
             }
-
+    
             if (!response.ok) {
                 throw new Error('Failed to submit activity');
             }
-
+    
             // Обновляем данные навыка
             this.currentSkill = await this.loadSkillDetails(this.currentSkill.code);
             this.render();
@@ -216,9 +217,11 @@ class MentalTracker {
         } catch (error) {
             console.error('Error submitting activity:', error);
             alert('Произошла ошибка при добавлении/редактировании активности');
+        } finally {
+            this.hideLoading();
         }
     }
-
+    
 
     showNewActivityModal() {
         const modal = document.getElementById('newActivityModal');
