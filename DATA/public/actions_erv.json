@@ -1,0 +1,148 @@
+{
+    "activities": {
+        "draw_sketch": {
+            "name": "Скетч карандашом",
+            "description": "Быстрая зарисовка на любую тему",
+            "points": 1,
+            "skill_code": "drawing"
+        },
+        "activity_1735643197604": {
+            "name": "Цифровой рисунок",
+            "description": "Создание цифрового рисунка в графическом редакторе",
+            "points": 1,
+            "skill_code": "drawing"
+        },
+        "draw_natur_beg_1": {
+            "name": "Рисование натюрморта или пейзажа. Начло. (Масло)",
+            "description": "Начало рисования маслом натюрморта или пейзажа по фотографии. Начло. (Масло)",
+            "points": 5,
+            "skill_code": "drawing"
+        },
+        "draw_natur_end_1": {
+            "name": "Рисование натюрморта или пейзажа. Завершение. (Масло)",
+            "description": "Окончание рисования маслом натюрморта или пейзажа по фотографии. Завершение. (Масло)",
+            "points": 10,
+            "skill_code": "drawing"
+        },
+        "draw_port_beg_1": {
+            "name": "КН Рисование портрета по фото. Начало. (Масло)",
+            "description": "Рисование портрета по фотографии. Начало. (Масло)",
+            "points": 6,
+            "skill_code": "drawing"
+        },
+        "draw_port_end_1": {
+            "name": "КК Рисование портрета по фото. Завершение. (Масло)",
+            "description": "Рисование портрета по фотографи. Завершение. (Масло)и",
+            "points": 12,
+            "skill_code": "drawing"
+        },
+        "practice_scales_1": {
+            "name": "Практика гамм",
+            "description": "Игра мажорных гамм. (30 мин)",
+            "points": 1,
+            "skill_code": "music"
+        },
+        "practice_scales_2": {
+            "name": "Практика гамм",
+            "description": "Игра минорных гамм. (30 мин)",
+            "points": 1,
+            "skill_code": "music"
+        },
+        "study_music_theory": {
+            "name": "Изучение музыкальной теории с правтикой. (30 мин)",
+            "description": "Изучение нотной грамоты, музыкальных терминов с правтикой",
+            "points": 1,
+            "skill_code": "music"
+        },
+        "meditation": {
+            "name": "Аполитичность",
+            "description": "Не смотреть ролики,сайты, блоги про политику и войну. Допустим только один ресурс стриница в день",
+            "points": 1,
+            "skill_code": "willpower"
+        },
+        "morning_exercise": {
+            "name": "Утренняя зарядка",
+            "description": "Простые упражнения для зарядки. Каждое утро.",
+            "points": 1,
+            "skill_code": "willpower"
+        },
+        "morning_walk": {
+            "name": "Утренняя прогулка",
+            "description": "Прогулка до работы вокруг карьера. Каждое утро.",
+            "points": 1,
+            "skill_code": "willpower"
+        },
+        "ni_kapli": {
+            "name": "Ни капли",
+            "description": "Сегодня ни капли. Заполняется в конце дня. Каждый день.",
+            "points": 1,
+            "skill_code": "willpower"
+        },
+        "ni_kapli_2": {
+            "name": "Ни капли в компании",
+            "description": "Сегодня ни капли в компани. Заполняется в конце дня.",
+            "points": 2,
+            "skill_code": "willpower"
+        },
+        "kaplja": {
+            "name": "Капля. Пара глотков в обстоятельствах.",
+            "description": "Капля. Пара глотков в обстоятельствах, когда не пригубить плохо.",
+            "points": -5,
+            "skill_code": "willpower"
+        },
+        "activity_1736327973396": {
+            "name": "90",
+            "description": "90",
+            "points": 90,
+            "skill_code": "drawing"
+        },
+        "activity_1736335638205": {
+            "name": "Тризвучия  (30 мин)",
+            "description": "Практикование трезвучий. (30 мин)",
+            "points": 1,
+            "skill_code": "music"
+        },
+        "activity_1736335638214": {
+            "name": "Разбор песни по аккордам (30 мин)",
+            "description": "Из инета разобрать одну песню по аккордам. (30 мин)",
+            "points": 1,
+            "skill_code": "music"
+        },
+        "activity_173633563821": {
+            "name": "Урокки пианино с Ириной Булаковой",
+            "description": "https://www.youtube.com/watch?v=wtrMdt_FdJo)",
+            "points": 1,
+            "skill_code": "music"
+        },
+        "activity_1736502424887": {
+            "name": "Уроки Musicca",
+            "description": "Практика и теория\nhttps://www.musicca.com",
+            "points": 1,
+            "skill_code": "music"
+        },
+        "activity_1736753310465": {
+            "name": "Записаться к зубному.",
+            "description": "Хотя бы записаться к зубному.",
+            "points": 10,
+            "skill_code": "willpower"
+        },
+        "activity_1736753384505": {
+            "name": "Записаться на ремонт машины.",
+            "description": "Записаться на ремонт машины.",
+            "points": 5,
+            "skill_code": "willpower"
+        },
+        "activity_1737138392591": {
+            "name": "Уроки Риши",
+            "description": "https://www.youtube.com/watch?v=_IYBy5Lhzec",
+            "points": 1,
+            "skill_code": "music"
+        },
+        "activity_1737545180057": {
+            "name": "2222",
+            "description": "2222",
+            "points": 22,
+            "skill_code": "willpower"
+        }
+    }
+}
