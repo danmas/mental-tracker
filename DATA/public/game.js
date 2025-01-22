@@ -27,9 +27,9 @@ async function calculateLevel(totalPoints) {
     };
 }
 
-async function addPoints(skillCode, points) {
+async function addPoints(skillCode, points, user) {
     try {
-        const skillData = await data.getSkillData(skillCode);
+        const skillData = await data.getSkillData(skillCode, user);
         const currentPoints = parseInt(skillData.currentPoints) || 0;
         const pointsToAdd = parseInt(points) || 0;
         const newTotalPoints = currentPoints + pointsToAdd;
@@ -38,12 +38,12 @@ async function addPoints(skillCode, points) {
         const levelData = await calculateLevel(newTotalPoints);
 
         // Обновляем данные в истории
-        const historyData = await data.readHistoryData();
+        const historyData = await data.readHistoryData(user);
         historyData.skills[skillCode].currentPoints = newTotalPoints;
         historyData.skills[skillCode].level = levelData.level;
         historyData.skills[skillCode].progress = levelData.progress;
 
-        await data.writeHistoryData(historyData);
+        await data.writeHistoryData(historyData, user);
 
         return { 
             totalPoints: newTotalPoints,
@@ -54,9 +54,9 @@ async function addPoints(skillCode, points) {
     }
 }
 
-async function recalculateSkillProgress(skillCode) {
+async function recalculateSkillProgress(skillCode, user) {
     try {
-        const skillHistory = await data.getSkillHistory(skillCode);
+        const skillHistory = await data.getSkillHistory(skillCode, user);
         if (!skillHistory) {
             throw new Error(`История для навыка ${skillCode} не найдена`);
         }
@@ -68,12 +68,12 @@ async function recalculateSkillProgress(skillCode) {
         const levelData = await calculateLevel(totalPoints);
 
         // Обновляем данные в истории
-        const historyData = await data.readHistoryData();
+        const historyData = await data.readHistoryData(user);
         historyData.skills[skillCode].currentPoints = totalPoints;
         historyData.skills[skillCode].level = levelData.level;
         historyData.skills[skillCode].progress = levelData.progress;
 
-        await data.writeHistoryData(historyData);
+        await data.writeHistoryData(historyData, user);
 
         return {
             totalPoints,

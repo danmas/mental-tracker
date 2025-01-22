@@ -15,31 +15,73 @@ const port = process.env.PORT || 3050;
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json()); // Для обработки JSON в теле запроса
 
+
+app.post('/ensureUserFilesExist', async (req, res) => {
+    try {
+        const { user } = req.body; // Получаем логин пользователя из тела запроса
+
+        if (!user) {
+            throw new Error('Пользователь не указан');
+        }
+
+        // Убеждаемся, что файлы данных для пользователя существуют
+        await data.ensureUserFilesExist(user);
+
+        res.json({ success: true, message: 'Файлы данных созданы или уже существуют' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+
 // --- GET запросы ---
 
 app.get('/skills', async (req, res) => {
     try {
-        const skills = await data.getAllSkills();
+        const user = req.query.user; // Получаем логин пользователя из запроса
+
+        if (!user) {
+            throw new Error('Пользователь не указан');
+        }
+
+        // Получаем навыки для конкретного пользователя
+        const skills = await data.getAllSkills(user);
         res.json(skills);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
 
+
 app.get('/skills/:skillCode', async (req, res) => {
     try {
         const skillCode = req.params.skillCode;
-        const skill = await data.getSkillData(skillCode);
+        const user = req.query.user; // Получаем логин пользователя из запроса
+
+        if (!user) {
+            throw new Error('Пользователь не указан');
+        }
+
+        // Получаем данные о навыке для конкретного пользователя
+        const skill = await data.getSkillData(skillCode, user);
         res.json(skill);
     } catch (error) {
         res.status(404).json({ error: error.message });
     }
 });
 
+
 app.get('/skills/:skillCode/history', async (req, res) => {
     try {
         const skillCode = req.params.skillCode;
-        const history = await data.getSkillHistory(skillCode);
+        const user = req.query.user; // Получаем логин пользователя из запроса
+
+        if (!user) {
+            throw new Error('Пользователь не указан');
+        }
+
+        console.log('get /skills/:skillCode/history '+user);
+        const history = await data.getSkillHistory(skillCode, user);
         res.json(history);
     } catch (error) {
         res.status(404).json({ error: error.message });
@@ -48,7 +90,13 @@ app.get('/skills/:skillCode/history', async (req, res) => {
 
 app.get('/activities', async (req, res) => {
     try {
-        const activities = await data.getActivities();
+        const user = req.query.user; // Получаем логин пользователя из запроса
+
+        if (!user) {
+            throw new Error('Пользователь не указан');
+        }
+
+        const activities = await data.getActivities(user);
         res.json(activities);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -61,9 +109,15 @@ app.post('/skills/:skillCode/history', async (req, res) => {
     try {
         const skillCode = req.params.skillCode;
         const { activityId, notes, timestamp } = req.body; // Получаем timestamp из тела запроса
+        const user = req.query.user; // Получаем логин пользователя из запроса
+
+        if (!user) {
+            throw new Error('Пользователь не указан');
+        }
+        console.log('post /skills/:skillCode/history '+user);
 
         // Получаем информацию об активности из справочника
-        const activities = await data.getActivities();
+        const activities = await data.getActivities(user);
         const activity = activities[activityId];
 
         if (!activity) {
@@ -88,10 +142,10 @@ app.post('/skills/:skillCode/history', async (req, res) => {
             timestamp // Используем переданный timestamp
         };
 
-        const newRecord = await data.addHistoryRecord(skillCode, record);
+        const newRecord = await data.addHistoryRecord(skillCode, record, user);
 
         // Пересчитываем прогресс навыка
-        const progressResult = await game.recalculateSkillProgress(skillCode);
+        const progressResult = await game.recalculateSkillProgress(skillCode, user);
 
         res.status(201).json({ 
             record: newRecord, 
@@ -107,9 +161,14 @@ app.put('/skills/:skillCode/history/:historyId', async (req, res) => {
     try {
         const { skillCode, historyId } = req.params;
         const { activityId, notes, timestamp, points } = req.body;
+        const user = req.query.user; // Получаем логин пользователя из запроса
+
+        if (!user) {
+            throw new Error('Пользователь не указан');
+        }
 
         // Получаем текущую историю
-        const historyData = await data.readHistoryData();
+        const historyData = await data.readHistoryData(user);
         const skillHistory = historyData.skills[skillCode];
 
         // Находим запись для обновления
@@ -128,10 +187,10 @@ app.put('/skills/:skillCode/history/:historyId', async (req, res) => {
         };
 
         // Сохраняем обновленную историю
-        await data.writeHistoryData(historyData);
+        await data.writeHistoryData(historyData, user);
 
         // Пересчитываем прогресс навыка
-        const progressResult = await game.recalculateSkillProgress(skillCode);
+        const progressResult = await game.recalculateSkillProgress(skillCode, user);
 
         // Пересортируем историю после обновления даты
         skillHistory.history.sort((a, b) => {
@@ -149,7 +208,12 @@ app.post('/skills/:skillCode/achievements', async (req, res) => {
     try {
         const skillCode = req.params.skillCode;
         const achievement = req.body;
-        const newAchievement = await data.addAchievement(skillCode, achievement);
+        const user = req.query.user; // Получаем логин пользователя из запроса
+
+        if (!user) {
+            throw new Error('Пользователь не указан');
+        }
+        const newAchievement = await data.addAchievement(skillCode, achievement, user);
         res.status(201).json(newAchievement);
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -158,6 +222,12 @@ app.post('/skills/:skillCode/achievements', async (req, res) => {
 
 app.post('/skills/:skillCode/points', async (req, res) => {
     try {
+        const user = req.query.user; // Получаем логин пользователя из запроса
+
+        if (!user) {
+            throw new Error('Пользователь не указан');
+        }
+
         const skillCode = req.params.skillCode;
         const points = req.body.points;
         const result = await game.addPoints(skillCode, points);
@@ -169,21 +239,44 @@ app.post('/skills/:skillCode/points', async (req, res) => {
 
 
 // POST /activities - создание новой активности 
-app.post('/activities', async (req, res) => {
-    console.log("/activities");
-    try {
+// app.post('/activities', async (req, res) => {
+//     console.log("/activities");
+//     try {
 
+//         const activity = req.body;
+
+//         // Проверяем существование навыка
+//         const skills = await data.getAllSkills();
+//         const skillExists = skills.some(skill => skill.code === activity.skill_code);
+//         if (!skillExists) {
+//             throw new Error(`Навык с кодом ${activity.skill_code} не найден`);
+//         }
+
+//         // Добавляем новую активность
+//         const newActivity = await data.addActivity(activity);
+//         res.status(201).json(newActivity);
+//     } catch (error) {
+//         res.status(400).json({ error: error.message });
+//     }
+// });
+app.post('/activities', async (req, res) => {
+    try {
         const activity = req.body;
+        const user = activity.user; // Получаем логин пользователя из тела запроса
+
+        if (!user) {
+            throw new Error('Пользователь не указан');
+        }
 
         // Проверяем существование навыка
-        const skills = await data.getAllSkills();
+        const skills = await data.getAllSkills(user); // Передаем логин пользователя
         const skillExists = skills.some(skill => skill.code === activity.skill_code);
         if (!skillExists) {
             throw new Error(`Навык с кодом ${activity.skill_code} не найден`);
         }
 
         // Добавляем новую активность
-        const newActivity = await data.addActivity(activity);
+        const newActivity = await data.addActivity(activity, user); // Передаем логин пользователя
         res.status(201).json(newActivity);
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -195,7 +288,13 @@ app.post('/activities', async (req, res) => {
 
 app.get('/history', async (req, res) => {
     try {
-        const historyData = await data.readHistoryData();
+        const user = req.query.user; // Получаем логин пользователя из запроса
+
+        if (!user) {
+            throw new Error('Пользователь не указан');
+        }
+
+        const historyData = await data.readHistoryData(user);
         res.json(historyData);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -204,8 +303,13 @@ app.get('/history', async (req, res) => {
 
 app.post('/history', async (req, res) => {
     try {
+        const user = req.query.user; // Получаем логин пользователя из запроса
+
+        if (!user) {
+            throw new Error('Пользователь не указан');
+        }
         const newHistory = req.body;
-        await data.writeHistoryData(newHistory);
+        await data.writeHistoryData(newHistory, user);
         res.json({ success: true, message: 'История успешно обновлена' });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -223,7 +327,13 @@ app.post('/history', async (req, res) => {
 
 app.get('/actions', async (req, res) => {
     try {
-        const actionsData = await data.readActionsData();
+        const user = req.query.user; // Получаем логин пользователя из запроса
+
+        if (!user) {
+            throw new Error('Пользователь не указан');
+        }
+
+        const actionsData = await data.readActionsData(user);
         res.json(actionsData);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -232,9 +342,15 @@ app.get('/actions', async (req, res) => {
 
 app.post('/actions', async (req, res) => {
     try {
+        const user = req.query.user; // Получаем логин пользователя из запроса
+
+        if (!user) {
+            throw new Error('Пользователь не указан');
+        }
+
         const newActions = req.body;
         // Добавим функцию writeActionsData в data.js
-        await data.writeActionsData(newActions);
+        await data.writeActionsData(newActions, user);
         // await fs.writeFile(actionsFilePath, JSON.stringify(newActions, null, 4));
         res.json({ success: true, message: 'Actions успешно обновлены' });
     } catch (error) {
@@ -261,13 +377,51 @@ app.post('/skills-raw', async (req, res) => {
     }
 });
 
+// app.delete('/skills/:skillCode/history/:historyId', async (req, res) => {
+//     try {
+//         const { skillCode, historyId } = req.params;
+
+//         // Получаем текущую историю
+//         const historyData = await data.readHistoryData();
+//         const skillHistory = historyData.skills[skillCode];
+
+//         // Находим индекс записи для удаления
+//         const recordIndex = skillHistory.history.findIndex(record => record.id === historyId);
+//         if (recordIndex === -1) {
+//             throw new Error('История не найдена');
+//         }
+
+//         // Удаляем запись из истории
+//         skillHistory.history.splice(recordIndex, 1);
+
+//         // Сохраняем обновленную историю
+//         await data.writeHistoryData(historyData);
+
+//         // Пересчитываем прогресс навыка
+//         const progressResult = await game.recalculateSkillProgress(skillCode);
+
+//         res.json({ success: true, points: progressResult });
+//     } catch (error) {
+//         res.status(400).json({ error: error.message });
+//     }
+// });
+
 app.delete('/skills/:skillCode/history/:historyId', async (req, res) => {
     try {
         const { skillCode, historyId } = req.params;
+        const user = req.query.user; // Получаем логин пользователя из запроса
 
-        // Получаем текущую историю
-        const historyData = await data.readHistoryData();
+        if (!user) {
+            throw new Error('Пользователь не указан');
+        }
+
+        // Получаем текущую историю для пользователя
+        const historyData = await data.readHistoryData(user);
         const skillHistory = historyData.skills[skillCode];
+
+        if (!skillHistory) {
+            throw new Error(`История для навыка ${skillCode} не найдена`);
+        }
 
         // Находим индекс записи для удаления
         const recordIndex = skillHistory.history.findIndex(record => record.id === historyId);
@@ -279,10 +433,10 @@ app.delete('/skills/:skillCode/history/:historyId', async (req, res) => {
         skillHistory.history.splice(recordIndex, 1);
 
         // Сохраняем обновленную историю
-        await data.writeHistoryData(historyData);
+        await data.writeHistoryData(historyData, user);
 
         // Пересчитываем прогресс навыка
-        const progressResult = await game.recalculateSkillProgress(skillCode);
+        const progressResult = await game.recalculateSkillProgress(skillCode, user);
 
         res.json({ success: true, points: progressResult });
     } catch (error) {
@@ -298,9 +452,6 @@ app.get('/editor', (req, res) => {
 app.get('/ping', (req, res) => {
     res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 });
-
-
-
 
 
 app.listen(port, () => {
