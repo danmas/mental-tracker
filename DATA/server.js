@@ -214,7 +214,7 @@ app.post('/skills/:skillCode/achievements', async (req, res) => {
             throw new Error('Пользователь не указан');
         }
         const newAchievement = await data.addAchievement(skillCode, achievement, user);
-        res.status(201).json(newAchievement);
+        res.status(201).json({ success: true, ...newAchievement });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
@@ -231,34 +231,13 @@ app.post('/skills/:skillCode/points', async (req, res) => {
         const skillCode = req.params.skillCode;
         const points = req.body.points;
         const result = await game.addPoints(skillCode, points);
-        res.status(200).json(result);
+        res.status(200).json({ success: true, ...result });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 });
 
 
-// POST /activities - создание новой активности 
-// app.post('/activities', async (req, res) => {
-//     console.log("/activities");
-//     try {
-
-//         const activity = req.body;
-
-//         // Проверяем существование навыка
-//         const skills = await data.getAllSkills();
-//         const skillExists = skills.some(skill => skill.code === activity.skill_code);
-//         if (!skillExists) {
-//             throw new Error(`Навык с кодом ${activity.skill_code} не найден`);
-//         }
-
-//         // Добавляем новую активность
-//         const newActivity = await data.addActivity(activity);
-//         res.status(201).json(newActivity);
-//     } catch (error) {
-//         res.status(400).json({ error: error.message });
-//     }
-// });
 app.post('/activities', async (req, res) => {
     try {
         const activity = req.body;
@@ -277,7 +256,7 @@ app.post('/activities', async (req, res) => {
 
         // Добавляем новую активность
         const newActivity = await data.addActivity(activity, user); // Передаем логин пользователя
-        res.status(201).json(newActivity);
+        res.status(201).json({ success: true, ...newActivity });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
@@ -315,12 +294,6 @@ app.post('/history', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
-
-
-// УСТАРЕЛО! // Добавляем новый маршрут для history_editor.html
-// app.get('/editor', (req, res) => {
-//     res.sendFile(path.join(__dirname, 'public', 'history_editor.html'));
-// });
 
 
 // Добавьте эти endpoints в server.js

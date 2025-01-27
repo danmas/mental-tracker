@@ -272,71 +272,71 @@ class MentalTracker {
     //     }
     // }
     
-    async handleActivitySubmit(event) {
-        event.preventDefault();
-        this.showLoading();
+    // async handleActivitySubmit(event) {
+    //     event.preventDefault();
+    //     this.showLoading();
     
-        const form = event.target;
-        const historyId = form.historyId.value;
-        const activityId = form.activity.value;
-        const notes = form.notes.value;
-        const date = form.date.value; // Получаем выбранную дату
-        const time = form.time.value; // Получаем выбранное время
-        const points = form.points.value;
+    //     const form = event.target;
+    //     const historyId = form.historyId.value;
+    //     const activityId = form.activity.value;
+    //     const notes = form.notes.value;
+    //     const date = form.date.value; // Получаем выбранную дату
+    //     const time = form.time.value; // Получаем выбранное время
+    //     const points = form.points.value;
     
-        if (!activityId) {
-            alert('Пожалуйста, выберите действие');
-            return;
-        }
+    //     if (!activityId) {
+    //         alert('Пожалуйста, выберите действие');
+    //         return;
+    //     }
     
-        try {
-            let response;
-            if (historyId) {
-                // Режим редактирования
-                response = await fetch(`${SKILLS_SERVICE_URL}/${this.currentSkill.code}/history/${historyId}?user=${this.currentUser}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        activityId,
-                        notes,
-                        points: parseInt(points),
-                        timestamp: this.formatDateTime(date, time) // Используем выбранные дату и время
-                    })
-                });
-            } else {
-                // Режим добавления
-                console.log(`this.currentUse: ${this.currentUser}`);
-                response = await fetch(`${SKILLS_SERVICE_URL}/${this.currentSkill.code}/history?user=${this.currentUser}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        activityId,
-                        notes,
-                        points: parseInt(points),
-                        timestamp: this.formatDateTime(date, time) // Используем выбранные дату и время
-                    })
-                });
-            }
+    //     try {
+    //         let response;
+    //         if (historyId) {
+    //             // Режим редактирования
+    //             response = await fetch(`${SKILLS_SERVICE_URL}/${this.currentSkill.code}/history/${historyId}?user=${this.currentUser}`, {
+    //                 method: 'PUT',
+    //                 headers: {
+    //                     'Content-Type': 'application/json'
+    //                 },
+    //                 body: JSON.stringify({
+    //                     activityId,
+    //                     notes,
+    //                     points: parseInt(points),
+    //                     timestamp: this.formatDateTime(date, time) // Используем выбранные дату и время
+    //                 })
+    //             });
+    //         } else {
+    //             // Режим добавления
+    //             console.log(`this.currentUse: ${this.currentUser}`);
+    //             response = await fetch(`${SKILLS_SERVICE_URL}/${this.currentSkill.code}/history?user=${this.currentUser}`, {
+    //                 method: 'POST',
+    //                 headers: {
+    //                     'Content-Type': 'application/json'
+    //                 },
+    //                 body: JSON.stringify({
+    //                     activityId,
+    //                     notes,
+    //                     points: parseInt(points),
+    //                     timestamp: this.formatDateTime(date, time) // Используем выбранные дату и время
+    //                 })
+    //             });
+    //         }
     
-            if (!response.ok) {
-                throw new Error('Failed to submit activity');
-            }
+    //         if (!response.ok) {
+    //             throw new Error('Failed to submit activity');
+    //         }
     
-            // Обновляем данные навыка
-            this.currentSkill = await this.loadSkillDetails(this.currentSkill.code);
-            this.render();
-            this.hideActivityFormModal();
-        } catch (error) {
-            console.error('Error submitting activity:', error);
-            alert('Произошла ошибка при добавлении/редактировании активности');
-        } finally {
-            this.hideLoading();
-        }
-    }
+    //         // Обновляем данные навыка
+    //         this.currentSkill = await this.loadSkillDetails(this.currentSkill.code);
+    //         this.render();
+    //         this.hideActivityFormModal();
+    //     } catch (error) {
+    //         console.error('Error submitting activity:', error);
+    //         alert('Произошла ошибка при добавлении/редактировании активности');
+    //     } finally {
+    //         this.hideLoading();
+    //     }
+    // }
 
 
     showNewActivityModal() {
@@ -357,18 +357,14 @@ class MentalTracker {
 
     // async handleNewActivitySubmit(event) {
     //     event.preventDefault();
-
+    
     //     const form = event.target;
-    //     //const activityId = form.activity.value;
-    //     //const notes = form.notes.value;
-    //     // alert('Новая активность создана');
-
     //     const name = form.activityName.value;
     //     const description = form.activityDescription.value;
     //     const points = form.activityPoints.value;
-
+    
     //     try {
-    //         const response = await fetch('/activities?user=${this.currentUser}', {
+    //         const response = await fetch(`/activities?user=${this.currentUser}`, {
     //             method: 'POST',
     //             headers: {
     //                 'Content-Type': 'application/json'
@@ -377,25 +373,17 @@ class MentalTracker {
     //                 name,
     //                 description,
     //                 points,
-    //                 skill_code: this.currentSkill.code
-    //                 // name: "+Цифровой рисунок",
-    //                 // description: "Создание цифрового рисунка в графическом редакторе",
-    //                 // points: 20,
-    //                 // skill_code: "drawing"
-
+    //                 skill_code: this.currentSkill.code,
+    //                 user: this.currentUser // Передаем текущего пользователя
     //             })
     //         });
-
+    
     //         if (!response.ok) {
     //             throw new Error('Error creating NEW activity');
     //         }
-
-    //         // перегружаем активности
-    //         await Promise.all([
-    //             this.loadActivities()
-    //         ]);
-
-    //         // Закрываем модальное окно и показываем сообщение об успехе
+    
+    //         // Перезагружаем активности
+    //         await this.loadActivities();
     //         this.hideNewActivityModal();
     //         alert('Активность успешно создана!');
     //     } catch (error) {
@@ -404,6 +392,9 @@ class MentalTracker {
     //     }
     // }
 
+    //
+    // Функции для работы с сервисом настроек
+    //    
     async handleNewActivitySubmit(event) {
         event.preventDefault();
     
@@ -441,9 +432,7 @@ class MentalTracker {
         }
     }
 
-    //
-    // Функции для работы с сервисом настроек
-    //    
+
     async loadSkills() {
         this.showLoading();
         try {
@@ -530,7 +519,33 @@ class MentalTracker {
 
     //-- NEW-3 
     // Добавим новые методы в класс MentalTracker
+    // groupHistoryByDays(history) {
+    //     const groups = {};
+
+    //     history.forEach(item => {
+    //         // Получаем дату без времени
+    //         const datePart = item.timestamp.split('-')[0];
+    //         if (!groups[datePart]) {
+    //             groups[datePart] = [];
+    //         }
+    //         groups[datePart].push(item);
+    //     });
+
+    //     // Сортируем даты в обратном порядке
+    //     return Object.entries(groups)
+    //         .sort(([dateA], [dateB]) => {
+    //             const [dayA, monthA, yearA] = dateA.split('.');
+    //             const [dayB, monthB, yearB] = dateB.split('.');
+    //             return new Date(yearB, monthB - 1, dayB) - new Date(yearA, monthA - 1, dayA);
+    //         });
+    // }
+    //-- NEW-3
+    // Добавим новые методы в класс MentalTracker
     groupHistoryByDays(history) {
+        if (!history || !Array.isArray(history)) {
+            return {};
+        }
+
         const groups = {};
 
         history.forEach(item => {
@@ -647,23 +662,94 @@ class MentalTracker {
         modal.style.display = 'none';
     }
 
+    // async handleActivitySubmit(event) {
+    //     event.preventDefault();
+    //     this.showLoading();
+
+    //     const form = event.target;
+    //     const historyId = form.historyId.value;
+    //     const activityId = form.activity.value;
+    //     const notes = form.notes.value;
+    //     const date = form.date.value;
+    //     const time = form.time.value;
+    //     const points = form.points.value;
+
+    //     if (!activityId) {
+    //         alert('Пожалуйста, выберите действие');
+    //         return;
+    //     }
+
+    //     try {
+    //         let response;
+    //         if (historyId) {
+    //             // Режим редактирования
+    //             response = await fetch(`${SKILLS_SERVICE_URL}/${this.currentSkill.code}/history/${historyId}?user=${this.currentUser}`, {
+    //                 method: 'PUT',
+    //                 headers: {
+    //                     'Content-Type': 'application/json'
+    //                 },
+    //                 body: JSON.stringify({
+    //                     activityId,
+    //                     notes,
+    //                     points: parseInt(points),
+    //                     timestamp: this.formatDateTime(date, time)
+    //                 })
+    //             });
+    //         } else {
+    //             // Режим добавления
+    //             response = await fetch(`${SKILLS_SERVICE_URL}/${this.currentSkill.code}/history?user=${this.currentUser}`, {
+    //                 method: 'POST',
+    //                 headers: {
+    //                     'Content-Type': 'application/json'
+    //                 },
+    //                 body: JSON.stringify({
+    //                     activityId,
+    //                     notes,
+    //                     points: parseInt(points),
+    //                     timestamp: this.formatDateTime(date, time)
+    //                 })
+    //             });
+    //         }
+
+    //         if (!response.ok) {
+    //             throw new Error('Failed to submit activity');
+    //         }
+
+    //         // Обновляем данные навыка
+    //         this.currentSkill = await this.loadSkillDetails(this.currentSkill.code);
+    //         this.render();
+    //         this.hideActivityFormModal();
+    //     } catch (error) {
+    //         console.error('Error submitting activity:', error);
+    //         alert('Произошла ошибка при добавлении/редактировании активности');
+    //     } finally {
+    //         this.hideLoading();
+    //     }
+    // }
     async handleActivitySubmit(event) {
         event.preventDefault();
         this.showLoading();
-
+    
         const form = event.target;
         const historyId = form.historyId.value;
         const activityId = form.activity.value;
         const notes = form.notes.value;
         const date = form.date.value;
         const time = form.time.value;
-        const points = form.points.value;
-
+        let points = form.points.value;
+    
         if (!activityId) {
             alert('Пожалуйста, выберите действие');
             return;
         }
 
+        // Проверяем, что points не пустая строка
+        if (!points) {
+            // Если points пустая, то получаем points из activities
+            const selectedActivity = this.activities[activityId];
+            points = selectedActivity ? selectedActivity.points : 0;
+        }
+    
         try {
             let response;
             if (historyId) {
@@ -695,11 +781,11 @@ class MentalTracker {
                     })
                 });
             }
-
+    
             if (!response.ok) {
                 throw new Error('Failed to submit activity');
             }
-
+    
             // Обновляем данные навыка
             this.currentSkill = await this.loadSkillDetails(this.currentSkill.code);
             this.render();
@@ -757,6 +843,95 @@ class MentalTracker {
         }
     }
 
+
+    // renderSkillView() {
+    //     const skill = this.currentSkill;
+    //     const detail = document.createElement('div');
+    //     detail.className = 'skill-detail';
+
+    //     const progress = typeof skill.progress === 'number' ? skill.progress : 0;
+
+    //     // Группируем историю по дням
+    //     let groupedHistory = this.groupHistoryByDays(skill.history);
+
+    //     // Проверяем, является ли groupedHistory массивом
+    //     if (!Array.isArray(groupedHistory)) {
+    //         groupedHistory = [];
+    //     }
+
+    //     const historyHTML = groupedHistory.map(([date, items]) => {
+    //         const dateId = date.replace(/\./g, '-');
+    //         return `
+    //         <div class="history-day">
+    //             <div class="day-header" onclick="app.toggleDayHistory('${date}')">
+    //                 <span id="icon-${dateId}">▼</span>
+    //                 <h3>${date}</h3>
+    //                 <span class="day-points">+${items.reduce((sum, item) => sum + item.points, 0)} очков</span>
+    //             </div>
+    //             <div id="history-${dateId}">
+    //                 ${items.map(item => {
+    //             const activity = this.activities[item.activityId];
+    //             return `
+    //                      <div class="history-item">
+    //                             <div class="history-item-main">
+    //                                 <h4>${activity ? activity.name : 'Активность'}</h4>
+    //                                 <p class="notes">${item.notes}</p>
+    //                             </div>
+    //                             <div class="history-item-actions">
+    //                                 <p class="timestamp">${item.timestamp.split('-')[1]}</p>
+    //                                 <span class="points-badge">+${item.points} очков</span>
+    //                                 <button class="btn btn-edit" onclick="app.showActivityFormModal(${JSON.stringify(item).replace(/"/g, '"')})">
+    //                                     ✎
+    //                                 </button>
+    //                                 <button class="btn btn-edit btn-delete" onclick="app.handleActivityDelete('${item.id}')">
+    //                                     🗑️
+    //                                 </button>
+    //                             </div>
+    //                         </div>
+    //                 `;
+    //         }).join('')}
+    //             </div>
+    //         </div>
+    //     `;
+    //     }).join('');
+
+    //     detail.innerHTML = `
+    //     <div class="skill-header">
+    //         <div>
+    //             <div class="skill-icon">
+    //                 ${this.getSkillIcon(skill.code)}
+    //             </div>
+    //             <h2>Уровень ${skill.level}(${progress}%)</h2>
+    //             <p>До следующего уровня: ${progress}% (${skill.currentPoints}) очков</p>
+    //         </div>
+    //         <button class="btn btn-primary" onclick="app.showActivityFormModal()">
+    //             + Добавить активность
+    //         </button>
+    //         <button class="btn btn-primary" onclick="app.showNewActivityModal()">
+    //             + Создать активность
+    //         </button>
+    //     </div>
+        
+    //     <div class="progress-bar">
+    //         <div class="progress-fill" style="width: ${progress}%"></div>
+    //     </div>
+        
+    //     <h3>История</h3>
+    //     <div class="history-list">
+    //         ${historyHTML}
+    //     </div>
+    // `;
+
+    //     this.mainContent.innerHTML = '';
+    //     this.mainContent.appendChild(detail);
+    // }
+
+//     <button class="btn btn-edit" onclick="app.showActivityFormModal(${JSON.stringify(item).replace(/"/g, '"')})">
+//     ✎
+// </button>
+
+// {" id":"act_1737979640316","activityid":"activity_1737978267848","name":"2222","description":"222","points":2,"notes":"","timestamp":"27.01.2025-15:07:00"}
+
     renderSkillView() {
         const skill = this.currentSkill;
         const detail = document.createElement('div');
@@ -765,7 +940,12 @@ class MentalTracker {
         const progress = typeof skill.progress === 'number' ? skill.progress : 0;
 
         // Группируем историю по дням
-        const groupedHistory = this.groupHistoryByDays(skill.history);
+        let groupedHistory = this.groupHistoryByDays(skill.history);
+
+        // Проверяем, является ли groupedHistory массивом
+        if (!Array.isArray(groupedHistory)) {
+            groupedHistory = [];
+        }
 
         const historyHTML = groupedHistory.map(([date, items]) => {
             const dateId = date.replace(/\./g, '-');
@@ -788,7 +968,7 @@ class MentalTracker {
                                 <div class="history-item-actions">
                                     <p class="timestamp">${item.timestamp.split('-')[1]}</p>
                                     <span class="points-badge">+${item.points} очков</span>
-                                    <button class="btn btn-edit" onclick="app.showActivityFormModal(${JSON.stringify(item).replace(/"/g, '&quot;')})">
+                                    <button class="btn btn-edit" onclick="app.showActivityFormModal(${JSON.stringify(item).replace(/"/g, '"')})">
                                         ✎
                                     </button>
                                     <button class="btn btn-edit btn-delete" onclick="app.handleActivityDelete('${item.id}')">
@@ -802,25 +982,6 @@ class MentalTracker {
             </div>
         `;
         }).join('');
-
-        /*
-        <div class="history-item">
-            <div class="history-item-main">
-                <h4>${activity ? activity.name : 'Активность'}</h4>
-                <p class="notes">${item.notes}</p>
-            </div>
-            <div class="history-item-actions">
-                <p class="timestamp">${item.timestamp.split('-')[1]}</p>
-                <span class="points-badge">+${item.points} очков</span>
-                <button class="btn btn-edit" onclick="app.showActivityFormModal(${JSON.stringify(item).replace(/"/g, '"')})">
-                    ✎
-                </button>
-                <button class="btn btn-edit btn-delete" onclick="app.handleActivityDelete('${item.id}')">
-                    🗑️
-                </button>
-            </div>
-        </div>    
-        */
 
         detail.innerHTML = `
         <div class="skill-header">
@@ -852,7 +1013,7 @@ class MentalTracker {
         this.mainContent.innerHTML = '';
         this.mainContent.appendChild(detail);
     }
-    //-- NEW-3 END
+
 
     showMainView() {
         this.currentView = 'main';
