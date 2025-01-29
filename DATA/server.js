@@ -15,7 +15,8 @@ const port = process.env.PORT || 3050;
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json()); // Для обработки JSON в теле запроса
 
-
+// curl -X POST   -H "Content-Type: application/json"   -d '{"user": "test_user_1"}'   http://localhost:3050/ensureUserFilesExist
+// http://localhost:3050/ensureUserFilesExist 
 app.post('/ensureUserFilesExist', async (req, res) => {
     try {
         const { user } = req.body; // Получаем логин пользователя из тела запроса
@@ -46,7 +47,9 @@ app.get('/skills', async (req, res) => {
 
         // Получаем навыки для конкретного пользователя
         const skills = await data.getAllSkills(user);
-        res.json(skills);
+        // res.json(skills);
+        res.status(201).json({ success: true, ...skills });
+
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

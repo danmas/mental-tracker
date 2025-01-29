@@ -926,9 +926,12 @@ class MentalTracker {
     //     this.mainContent.appendChild(detail);
     // }
 
-//     <button class="btn btn-edit" onclick="app.showActivityFormModal(${JSON.stringify(item).replace(/"/g, '"')})">
+//<button class="btn btn-edit" onclick="app.showActivityFormModal(${JSON.stringify(item).replace(/"/g, '"')})">
 //     ✎
 // </button>
+//  <button class="btn btn-edit" onclick="app.showActivityFormModal({&quot;id&quot;:&quot;act_1737787562029&quot;,&quot;activityId&quot;:&quot;morning_exercise&quot;,&quot;name&quot;:&quot;Утренняя зарядка&quot;,&quot;description&quot;:&quot;Простые упражнения для зарядки. Каждое утро.&quot;,&quot;points&quot;:1,&quot;notes&quot;:&quot;&quot;,&quot;timestamp&quot;:&quot;25.01.2025-09:45:00&quot;})">
+//                                         ✎
+//                                     </button> 
 
 // {" id":"act_1737979640316","activityid":"activity_1737978267848","name":"2222","description":"222","points":2,"notes":"","timestamp":"27.01.2025-15:07:00"}
 
@@ -968,7 +971,7 @@ class MentalTracker {
                                 <div class="history-item-actions">
                                     <p class="timestamp">${item.timestamp.split('-')[1]}</p>
                                     <span class="points-badge">+${item.points} очков</span>
-                                    <button class="btn btn-edit" onclick="app.showActivityFormModal(${JSON.stringify(item).replace(/"/g, '"')})">
+                                    <button class="btn btn-edit" onclick='app.showActivityFormModal(${JSON.stringify(item).replace(/'/g, "\\'")})'>
                                         ✎
                                     </button>
                                     <button class="btn btn-edit btn-delete" onclick="app.handleActivityDelete('${item.id}')">
