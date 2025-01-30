@@ -391,10 +391,97 @@ class MentalTracker {
     //         alert('Произошла ошибка при добавлении NEW активности');
     //     }
     // }
+    // async handleNewActivitySubmit(event) {
+    //     event.preventDefault();
+    
+    //     const form = event.target;
+    //     const name = form.activityName.value;
+    //     const description = form.activityDescription.value;
+    //     const points = form.activityPoints.value;
+    //     const dueDate = form.activityDueDate.value || null;
+    
+    //     try {
+    //         const response = await fetch(`/activities?user=${this.currentUser}`, {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json'
+    //             },
+    //             body: JSON.stringify({
+    //                 name,
+    //                 description,
+    //                 points,
+    //                 dueDate,
+    //                 skill_code: this.currentSkill.code,
+    //                 user: this.currentUser,
+    //                 isTask: true,
+    //                 isDone: false
+    //             })
+    //         });
+    
+    //         if (!response.ok) {
+    //             throw new Error('Error creating activity');
+    //         }
+    
+    //         // Если нет срока выполнения, начисляем очки сразу
+    //         if (!dueDate) {
+    //             await this.addPoints(parseInt(points));
+    //         }
+    
+    //         await this.loadActivities();
+    //         this.hideNewActivityModal();
+    //         alert('Задача успешно создана!');
+    //     } catch (error) {
+    //         console.error('Error adding activity:', error);
+    //         alert('Произошла ошибка при создании задачи');
+    //     }
+    // }
+    
+    // Новый метод для переключения статуса выполнения
+    // async handleNewActivitySubmit(event) {
+    //     event.preventDefault();
+    
+    //     const form = event.target;
+    //     const name = form.activityName.value;
+    //     const description = form.activityDescription.value;
+    //     const points = form.activityPoints.value;
+    //     const dueDate = form.activityDueDate.value || null;
+    
+    //     try {
+    //         const response = await fetch(`/activities?user=${this.currentUser}`, {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json'
+    //             },
+    //             body: JSON.stringify({
+    //                 name,
+    //                 description,
+    //                 points,
+    //                 dueDate,
+    //                 skill_code: this.currentSkill.code,
+    //                 user: this.currentUser,
+    //                 isTask: true,
+    //                 isDone: false
+    //             })
+    //         });
+    
+    //         if (!response.ok) {
+    //             throw new Error('Error creating activity');
+    //         }
+    
+    //         // Если нет срока выполнения, начисляем очки сразу
+    //         if (!dueDate) {
+    //             await this.addPoints(parseInt(points));
+    //         }
+    
+    //         await this.loadActivities();
+    //         this.hideNewActivityModal();
+    //         alert('Задача успешно создана!');
+    //     } catch (error) {
+    //         console.error('Error adding activity:', error);
+    //         alert('Произошла ошибка при создании задачи');
+    //     }
+    // }
 
-    //
-    // Функции для работы с сервисом настроек
-    //    
     async handleNewActivitySubmit(event) {
         event.preventDefault();
     
@@ -402,6 +489,7 @@ class MentalTracker {
         const name = form.activityName.value;
         const description = form.activityDescription.value;
         const points = form.activityPoints.value;
+        const dueDate = form.activityDueDate.value || null;
     
         try {
             const response = await fetch(`/activities?user=${this.currentUser}`, {
@@ -413,27 +501,251 @@ class MentalTracker {
                     name,
                     description,
                     points,
+                    dueDate,
                     skill_code: this.currentSkill.code,
-                    user: this.currentUser // Передаем текущего пользователя
+                    user: this.currentUser,
+                    isTask: true,
+                    isDone: false
                 })
             });
     
             if (!response.ok) {
-                throw new Error('Error creating NEW activity');
+                throw new Error('Error creating activity');
             }
     
-            // Перезагружаем активности
+            // Если нет срока выполнения, начисляем очки сразу
+            if (!dueDate) {
+                await this.addPoints(parseInt(points));
+            }
+    
             await this.loadActivities();
             this.hideNewActivityModal();
-            alert('Активность успешно создана!');
+            alert('Задача успешно создана!');
         } catch (error) {
-            console.error('Error adding NEW activity:', error);
-            alert('Произошла ошибка при добавлении NEW активности');
+            console.error('Error adding activity:', error);
+            alert('Произошла ошибка при создании задачи');
         }
     }
 
 
-    async loadSkills() {
+//     async toggleTaskCompletion(activityId, isDone) {
+//     try {
+//         const activity = this.activities[activityId];
+//         if (!activity) return;
+
+//         const completedDate = isDone ? new Date().toISOString() : null;
+        
+//         const response = await fetch(`/activities/${activityId}?user=${this.currentUser}`, {
+//             method: 'PATCH',
+//             headers: {
+//                 'Content-Type': 'application/json'
+//             },
+//             body: JSON.stringify({
+//                 isDone,
+//                 completedDate
+//             })
+//         });
+
+//         if (!response.ok) {
+//             throw new Error('Failed to update task status');
+//         }
+
+//         // Если задача выполнена и у неё был срок выполнения, начисляем очки
+//         if (isDone && activity.dueDate) {
+//             await this.addPoints(parseInt(activity.points));
+//         }
+
+//         await this.loadActivities();
+//         this.render();
+//     } catch (error) {
+//         console.error('Error updating task status:', error);
+//         alert('Произошла ошибка при обновлении статуса задачи');
+//     }
+// }
+async toggleTaskCompletion(activityId, isDone) {
+    try {
+        const activity = this.activities[activityId];
+        if (!activity) return;
+
+        const completedDate = isDone ? new Date().toISOString() : null;
+        
+        const response = await fetch(`/activities/${activityId}?user=${this.currentUser}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                isDone,
+                completedDate
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to update task status');
+        }
+
+        // Если задача выполнена и у неё был срок выполнения, начисляем очки
+        if (isDone && activity.dueDate) {
+            await this.addPoints(parseInt(activity.points));
+        }
+
+        await this.loadActivities();
+        this.render();
+    } catch (error) {
+        console.error('Error updating task status:', error);
+        alert('Произошла ошибка при обновлении статуса задачи');
+    }
+}
+
+    
+    async toggleTaskCompletion(activityId, isDone) {
+        try {
+            const activity = this.activities[activityId];
+            if (!activity) return;
+    
+            const completedDate = isDone ? new Date().toISOString() : null;
+            
+            const response = await fetch(`/activities/${activityId}?user=${this.currentUser}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    isDone,
+                    completedDate
+                })
+            });
+    
+            if (!response.ok) {
+                throw new Error('Failed to update task status');
+            }
+    
+            // Если задача выполнена и у неё был срок выполнения, начисляем очки
+            if (isDone && activity.dueDate) {
+                await this.addPoints(parseInt(activity.points));
+            }
+    
+            await this.loadActivities();
+            this.render();
+        } catch (error) {
+            console.error('Error updating task status:', error);
+            alert('Произошла ошибка при обновлении статуса задачи');
+        }
+    }
+    
+    // Обновлённый метод отрисовки активности в истории
+    // renderHistoryItem(item) {
+    //     const activity = this.activities[item.activityId];
+    //     if (!activity) return '';
+    
+    //     const isDone = activity.isDone;
+    //     const dueDate = activity.dueDate ? new Date(activity.dueDate).toLocaleDateString() : '';
+    //     const isOverdue = activity.dueDate && !isDone && new Date(activity.dueDate) < new Date();
+    
+    //     return `
+    //         <div class="history-item ${isDone ? 'done' : ''} ${isOverdue ? 'overdue' : ''}">
+    //             <div class="history-item-main">
+    //                 <h4>${activity.name}</h4>
+    //                 <p class="notes">${item.notes}</p>
+    //                 ${dueDate ? `<p class="due-date">Срок: ${dueDate}</p>` : ''}
+    //             </div>
+    //             <div class="history-item-actions">
+    //                 <p class="timestamp">${item.timestamp.split('-')[1]}</p>
+    //                 <span class="points-badge">+${item.points} очков</span>
+    //                 ${activity.isTask ? `
+    //                     <label class="task-checkbox">
+    //                         <input type="checkbox" 
+    //                                ${isDone ? 'checked' : ''} 
+    //                                onchange="app.toggleTaskCompletion('${item.activityId}', this.checked)">
+    //                         Выполнено
+    //                     </label>
+    //                 ` : ''}
+    //                 <button class="btn btn-edit" onclick='app.showActivityFormModal(${JSON.stringify(item).replace(/'/g, "\\'")})'>
+    //                     ✎
+    //                 </button>
+    //                 <button class="btn btn-edit btn-delete" onclick="app.handleActivityDelete('${item.id}')">
+    //                     🗑️
+    //                 </button>
+    //             </div>
+    //         </div>
+    //     `;
+    // }
+// Обновлённый метод отрисовки активности в истории
+// renderHistoryItem(item) {
+//     const activity = this.activities[item.activityId];
+//     if (!activity) return '';
+
+//     const isDone = activity.isDone;
+//     const dueDate = activity.dueDate ? new Date(activity.dueDate).toLocaleDateString() : '';
+//     const isOverdue = activity.dueDate && !isDone && new Date(activity.dueDate) < new Date();
+
+//     return `
+//         <div class="history-item ${isDone ? 'done' : ''} ${isOverdue ? 'overdue' : ''}">
+//             <div class="history-item-main">
+//                 <h4>${activity.name}</h4>
+//                 <p class="notes">${item.notes}</p>
+//                 ${dueDate ? `<p class="due-date">Срок: ${dueDate}</p>` : ''}
+//             </div>
+//             <div class="history-item-actions">
+//                 <p class="timestamp">${item.timestamp.split('-')[1]}</p>
+//                 <span class="points-badge">+${item.points} очков</span>
+//                 ${activity.isTask ? `
+//                     <label class="task-checkbox">
+//                         <input type="checkbox" 
+//                                ${isDone ? 'checked' : ''} 
+//                                onchange="app.toggleTaskCompletion('${item.activityId}', this.checked)">
+//                         Выполнено
+//                     </label>
+//                 ` : ''}
+//                 <button class="btn btn-edit" onclick='app.showActivityFormModal(${JSON.stringify(item).replace(/'/g, "\\'")})'>
+//                     ✎
+//                 </button>
+//                 <button class="btn btn-edit btn-delete" onclick="app.handleActivityDelete('${item.id}')">
+//                     🗑️
+//                 </button>
+//             </div>
+//         </div>
+//     `;
+// }
+// Обновлённый метод отрисовки активности в истории
+renderHistoryItem(item) {
+    const activity = this.activities[item.activityId];
+    if (!activity) return '';
+
+    const isDone = activity.isDone;
+    const dueDate = activity.dueDate ? new Date(activity.dueDate).toLocaleDateString() : '';
+    const isOverdue = activity.dueDate && !isDone && new Date(activity.dueDate) < new Date();
+
+    return `
+        <div class="history-item ${isDone ? 'done' : ''} ${isOverdue ? 'overdue' : ''}">
+            <div class="history-item-main">
+                <h4>${activity.name}</h4>
+                <p class="notes">${item.notes}</p>
+                ${dueDate ? `<p class="due-date">Срок: ${dueDate}</p>` : ''}
+            </div>
+            <div class="history-item-actions">
+                <p class="timestamp">${item.timestamp.split('-')[1]}</p>
+                <span class="points-badge">+${item.points} очков</span>
+                ${activity.isTask ? `
+                    <label class="task-checkbox">
+                        <input type="checkbox" 
+                               ${isDone ? 'checked' : ''} 
+                               onchange="app.toggleTaskCompletion('${item.activityId}', this.checked)">
+                        Выполнено
+                    </label>
+                ` : ''}
+                <button class="btn btn-edit" onclick='app.showActivityFormModal(${JSON.stringify(item).replace(/'/g, "\\'")})'>
+                    ✎
+                </button>
+                <button class="btn btn-edit btn-delete" onclick="app.handleActivityDelete('${item.id}')">
+                    🗑️
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+async loadSkills() {
         this.showLoading();
         try {
             const response = await fetch(`${SKILLS_SERVICE_URL}?user=${this.currentUser}`); // Передаем текущего пользователя

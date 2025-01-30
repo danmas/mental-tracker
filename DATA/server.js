@@ -36,22 +36,42 @@ app.post('/ensureUserFilesExist', async (req, res) => {
 
 // --- GET запросы ---
 
+// app.get('/skills', async (req, res) => {
+//     try {
+//         const user = req.query.user; // Получаем логин пользователя из запроса
+
+//         if (!user) {
+//             throw new Error('Пользователь не указан');
+//         }
+
+//         // Получаем навыки для конкретного пользователя
+//         const skills = await data.getAllSkills(user);
+//         res.status(201).json({ success: true, ...skills });
+//     } catch (error) {
+//         res.status(500).json({ error: error.message });
+//     }
+// });
 app.get('/skills', async (req, res) => {
     try {
-        const user = req.query.user; // Получаем логин пользователя из запроса
-
+        const { user } = req.query;
+        console.log('Getting skills for user:', user);
+        
         if (!user) {
-            throw new Error('Пользователь не указан');
+            console.log('No user provided');
+            return res.status(400).json({ error: 'User parameter is required' });
         }
 
-        // Получаем навыки для конкретного пользователя
         const skills = await data.getAllSkills(user);
-        res.status(201).json({ success: true, ...skills });
+        console.log('Retrieved skills:', skills);
+
+        // Убедимся, что возвращаем массив
+        const response = Array.isArray(skills) ? skills : [];
+        res.json(response);
     } catch (error) {
+        console.error('Error getting skills:', error);
         res.status(500).json({ error: error.message });
     }
 });
-
 
 app.get('/skills/:skillCode', async (req, res) => {
     try {
@@ -239,32 +259,88 @@ app.post('/skills/:skillCode/points', async (req, res) => {
 });
 
 
-app.post('/activities', async (req, res) => {
+// Обработчик PATCH-запроса для обновления статуса задачи
+app.patch('/activities/:activityId', async (req, res) => {
     try {
-        const activity = req.body;
-        const user = activity.user; // Получаем логин пользователя из тела запроса
+        const { activityId } = req.params;
+        const { user } = req.query;
+        const updateData = req.body;
 
         if (!user) {
-            throw new Error('Пользователь не указан');
+            return res.status(400).json({ error: 'User parameter is required' });
         }
 
-        // Проверяем существование навыка
-        const skills = await data.getAllSkills(user); // Передаем логин пользователя
-        const skillExists = skills.some(skill => skill.code === activity.skill_code);
-        if (!skillExists) {
-            throw new Error(`Навык с кодом ${activity.skill_code} не найден`);
+        // Обновляем активность
+        const updatedActivity = await data.updateActivity(activityId, updateData, user);
+
+        // Если задача стала выполненной и у неё был срок выполнения,
+        // нужно начислить очки
+        if (updateData.isDone && updatedActivity.dueDate) {
+            // Получаем текущий навык
+            const skillData = await data.getSkillData(updatedActivity.skill_code, user);
+            
+            // Начисляем очки
+            await game.addPoints(updatedActivity.skill_code, updatedActivity.points, user);
         }
 
-        // Добавляем новую активность
-        const newActivity = await data.addActivity(activity, user); // Передаем логин пользователя
-        res.status(201).json({ success: true, ...newActivity });
+        res.json(updatedActivity);
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        console.error('Error updating activity:', error);
+        res.status(500).json({ error: error.message });
     }
 });
 
 
+// app.post('/activities', async (req, res) => {
+//     try {
+//         const activity = req.body;
+//         const user = activity.user; // Получаем логин пользователя из тела запроса
+
+//         if (!user) {
+//             throw new Error('Пользователь не указан');
+//         }
+
+//         // Проверяем существование навыка
+//         const skills = await data.getAllSkills(user); // Передаем логин пользователя
+//         const skillExists = skills.some(skill => skill.code === activity.skill_code);
+//         if (!skillExists) {
+//             throw new Error(`Навык с кодом ${activity.skill_code} не найден`);
+//         }
+
+//         // Добавляем новую активность
+//         const newActivity = await data.addActivity(activity, user); // Передаем логин пользователя
+//         res.status(201).json({ success: true, ...newActivity });
+//     } catch (error) {
+//         res.status(400).json({ error: error.message });
+//     }
+// });
 // Манипуляция с историей
+
+// Обновляем обработчик POST для создания новой активности
+app.post('/activities', async (req, res) => {
+    try {
+        const { user } = req.query;
+        if (!user) {
+            return res.status(400).json({ error: 'User parameter is required' });
+        }
+
+        const activity = req.body;
+        
+        // Создаем новую активность
+        const newActivity = await data.addActivity(activity, user);
+
+        // Если это задача без срока выполнения, начисляем очки сразу
+        if (activity.isTask && !activity.dueDate) {
+            await game.addPoints(activity.skill_code, activity.points, user);
+        }
+
+        res.status(201).json(newActivity);
+    } catch (error) {
+        console.error('Error creating activity:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 
 app.get('/history', async (req, res) => {
     try {

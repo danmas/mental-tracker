@@ -490,3 +490,35 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+
+.history-item.done {
+    opacity: 0.7;
+}
+
+.history-item.done h4 {
+    text-decoration: line-through;
+}
+
+.history-item.overdue .due-date {
+    color: #f44336;
+}
+
+.task-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #9CA3AF;
+    cursor: pointer;
+}
+
+.task-checkbox input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.due-date {
+    font-size: 0.875rem;
+    color: #9CA3AF;
+    margin-top: 0.25rem;
+}

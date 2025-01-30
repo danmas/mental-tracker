@@ -37,7 +37,7 @@
     </div>
 
     <!-- Модальное окно создания новой активности -->
-    <div id="newActivityModal" class="modal-overlay" style="display: none;">
+    <!-- <div id="newActivityModal" class="modal-overlay" style="display: none;">
         <div class="modal">
             <div class="modal-header">
                 <h2>Создать новую активность</h2>
@@ -72,8 +72,49 @@
                 </div>
             </form>
         </div>
-    </div>
+    </div> -->
+<!-- Модальное окно создания новой активности -->
+<div id="newActivityModal" class="modal-overlay" style="display: none;">
+    <div class="modal">
+        <div class="modal-header">
+            <h2>Создать новую задачу</h2>
+            <button class="modal-close">&times;</button>
+        </div>
+        <form id="newActivityForm" onsubmit="app.handleNewActivitySubmit(event)">
+            <div class="form-group">
+                <label class="form-label" for="activityName">Название</label>
+                <input type="text" id="activityName" name="name" class="form-input"
+                    placeholder="Например: Цифровой рисунок" required>
+            </div>
 
+            <div class="form-group">
+                <label class="form-label" for="activityDescription">Описание</label>
+                <textarea id="activityDescription" name="description" class="form-textarea" rows="3"
+                    placeholder="Опишите задачу..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="activityPoints">Очки</label>
+                <input type="number" id="activityPoints" name="points" class="form-input" min="1" max="100"
+                    required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="activityDueDate">Срок выполнения (необязательно)</label>
+                <input type="date" id="activityDueDate" name="dueDate" class="form-input">
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="app.hideNewActivityModal()">
+                    Отмена
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    Создать
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
     <!-- Новое универсальное -->
     <!-- Модальное окно добавления/редактирования активности -->
