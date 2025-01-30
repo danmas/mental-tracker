@@ -251,7 +251,7 @@ app.post('/skills/:skillCode/points', async (req, res) => {
 
         const skillCode = req.params.skillCode;
         const points = req.body.points;
-        const result = await game.addPoints(skillCode, points);
+        const result = await game.addPoints(skillCode, points, user);
         res.status(200).json({ success: true, ...result });
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -463,6 +463,30 @@ app.delete('/skills/:skillCode/history/:historyId', async (req, res) => {
     }
 });
 
+
+// В server.js добавить обработчик
+app.post('/skills/:skillCode/points', async (req, res) => {
+    try {
+        const { skillCode } = req.params;
+        const { user } = req.query;
+        const { points } = req.body;
+
+        if (!user) {
+            return res.status(400).json({ error: 'User parameter is required' });
+        }
+
+        if (typeof points !== 'number') {
+            return res.status(400).json({ error: 'Points must be a number' });
+        }
+
+        // Используем существующую функцию из game.js
+        const updatedSkill = await game.addPoints(skillCode, points, user);
+        res.json(updatedSkill);
+    } catch (error) {
+        console.error('Error adding points:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
 
 app.get('/editor', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'json_editor.html'));

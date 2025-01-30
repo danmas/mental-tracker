@@ -184,9 +184,9 @@ body {
     background-color: #1F2937;
     border: 1px solid #374151;
     border-radius: 0.5rem;
-    padding: 1rem;  /* Уменьшили padding */
+    padding: 1rem; 
     width: 90%;
-    max-width: 450px;  /* Уменьшили максимальную ширину */
+    max-width: 450px; 
 } */
 
 .modal-header {
@@ -521,4 +521,57 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     font-size: 0.875rem;
     color: #9CA3AF;
     margin-top: 0.25rem;
+}
+
+.radio-group {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #F3F4F6;
+    cursor: pointer;
+}
+
+.radio-label input[type="radio"] {
+    cursor: pointer;
+}
+
+.date-time-group {
+    display: flex;
+    gap: 1rem;
+}
+
+.date-time-group > div {
+    flex: 1;
+}
+
+#taskFields {
+    border-top: 1px solid #374151;
+    margin-top: 1rem;
+    padding-top: 1rem;
+}
+
+.task-fields {
+    border-top: 1px solid #374151;
+    margin-top: 1rem;
+    padding-top: 1rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #F3F4F6;
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
 }

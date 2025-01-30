@@ -339,13 +339,67 @@ class MentalTracker {
     // }
 
 
-    showNewActivityModal() {
-        const modal = document.getElementById('newActivityModal');
-        modal.style.display = 'block';
-        // Очищаем форму
-        document.getElementById('newActivityForm').reset();
-        // this.hideAddActivityModal();
+    // showNewActivityModal() {
+    //     const modal = document.getElementById('newActivityModal');
+    //     modal.style.display = 'block';
+    //     // Очищаем форму
+    //     document.getElementById('newActivityForm').reset();
+    //     // this.hideAddActivityModal();
+    // }
+// Добавим метод для переключения полей задачи
+showNewActivityModal() {
+    const modal = document.getElementById('newActivityModal');
+    const form = document.getElementById('newActivityForm');
+    const taskFields = document.getElementById('taskFields');
+    
+    // Очищаем форму
+    form.reset();
+    
+    // Устанавливаем текущую дату как минимальную для срока выполнения
+    const today = new Date().toISOString().split('T')[0];
+    const dueDateInput = document.getElementById('activityDueDate');
+    if (dueDateInput) {
+        dueDateInput.min = today;
     }
+    
+    // Обработчик переключения типа активности
+    const radioButtons = form.querySelectorAll('input[name="activityType"]');
+    radioButtons.forEach(radio => {
+        radio.onchange = (e) => {
+            const isTask = e.target.value === 'task';
+            taskFields.style.display = isTask ? 'block' : 'none';
+        };
+    });
+
+    modal.style.display = 'block';
+}
+
+
+async addPoints(points) {
+    try {
+        // Используем путь, который ведет к существующему обработчику game.addPoints
+        const response = await fetch(`${SKILLS_SERVICE_URL}/${this.currentSkill.code}/points?user=${this.currentUser}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ points })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to add points');
+        }
+
+        // Получаем обновленные данные навыка
+        this.currentSkill = await this.loadSkillDetails(this.currentSkill.code);
+        this.render();
+        
+        return this.currentSkill;
+    } catch (error) {
+        console.error('Error adding points:', error);
+        throw error;
+    }
+}
 
     hideNewActivityModal() {
         const modal = document.getElementById('newActivityModal');
@@ -482,6 +536,51 @@ class MentalTracker {
     //     }
     // }
 
+    // async handleNewActivitySubmit(event) {
+    //     event.preventDefault();
+    
+    //     const form = event.target;
+    //     const name = form.activityName.value;
+    //     const description = form.activityDescription.value;
+    //     const points = form.activityPoints.value;
+    //     const dueDate = form.activityDueDate.value || null;
+    
+    //     try {
+    //         const response = await fetch(`/activities?user=${this.currentUser}`, {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json'
+    //             },
+    //             body: JSON.stringify({
+    //                 name,
+    //                 description,
+    //                 points,
+    //                 dueDate,
+    //                 skill_code: this.currentSkill.code,
+    //                 user: this.currentUser,
+    //                 isTask: true,
+    //                 isDone: false
+    //             })
+    //         });
+    
+    //         if (!response.ok) {
+    //             throw new Error('Error creating activity');
+    //         }
+    
+    //         // Если нет срока выполнения, начисляем очки сразу
+    //         if (!dueDate) {
+    //             await this.addPoints(parseInt(points));
+    //         }
+    
+    //         await this.loadActivities();
+    //         this.hideNewActivityModal();
+    //         alert('Задача успешно создана!');
+    //     } catch (error) {
+    //         console.error('Error adding activity:', error);
+    //         alert('Произошла ошибка при создании задачи');
+    //     }
+    // }
+
     async handleNewActivitySubmit(event) {
         event.preventDefault();
     
@@ -489,7 +588,16 @@ class MentalTracker {
         const name = form.activityName.value;
         const description = form.activityDescription.value;
         const points = form.activityPoints.value;
-        const dueDate = form.activityDueDate.value || null;
+        const activityType = form.activityType.value;
+        const isTask = activityType === 'task';
+    
+        // Получаем значения срока выполнения только если это задача
+        let dueDate = null;
+        if (isTask && form.activityDueDate.value) {
+            const date = form.activityDueDate.value;
+            const time = form.activityDueTime.value || '23:59';
+            dueDate = `${date}T${time}`;
+        }
     
         try {
             const response = await fetch(`/activities?user=${this.currentUser}`, {
@@ -500,11 +608,11 @@ class MentalTracker {
                 body: JSON.stringify({
                     name,
                     description,
-                    points,
+                    points: parseInt(points),
                     dueDate,
                     skill_code: this.currentSkill.code,
                     user: this.currentUser,
-                    isTask: true,
+                    isTask,
                     isDone: false
                 })
             });
@@ -513,8 +621,8 @@ class MentalTracker {
                 throw new Error('Error creating activity');
             }
     
-            // Если нет срока выполнения, начисляем очки сразу
-            if (!dueDate) {
+            // Если это не задача или задача без срока выполнения, начисляем очки сразу
+            if (!isTask || !dueDate) {
                 await this.addPoints(parseInt(points));
             }
     
@@ -526,7 +634,8 @@ class MentalTracker {
             alert('Произошла ошибка при создании задачи');
         }
     }
-
+    
+    
 
 //     async toggleTaskCompletion(activityId, isDone) {
 //     try {
@@ -879,6 +988,94 @@ async loadSkills() {
     }
 
 
+    // showActivityFormModal(historyItemString = null) {
+    //     const modal = document.getElementById('activityFormModal');
+    //     const form = document.getElementById('activityForm');
+    //     const activitySelect = document.getElementById('activitySelect');
+    //     const modalTitle = document.getElementById('activityModalTitle');
+    //     const historyIdInput = form.querySelector('#historyId');
+    //     const pointsInput = form.querySelector('#pointsInput');
+    //     const dateInput = form.querySelector('#dateInput');
+    //     const timeInput = form.querySelector('#timeInput');
+
+    //     // Очищаем и заполняем список активностей
+    //     activitySelect.innerHTML = '<option value="">Выберите действие</option>';
+    //     Object.entries(this.activities)
+    //         .filter(([_, activity]) => activity.skill_code === this.currentSkill.code)
+    //         .forEach(([id, activity]) => {
+    //             const option = document.createElement('option');
+    //             option.value = id;
+    //             option.textContent = `${activity.name} (+${activity.points} очков)`;
+    //             activitySelect.appendChild(option);
+    //         });
+
+    //     // Сбрасываем форму
+    //     form.reset();
+
+    //     let historyItem = null;
+    //     if (historyItemString) {
+    //         historyItem = historyItemString;
+    //     }
+
+    //     if (historyItem) {
+    //         // Режим редактирования
+    //         modalTitle.textContent = 'Редактировать активность';
+    //         if (historyIdInput) {
+    //             historyIdInput.value = historyItem.id;
+    //         }
+    //         activitySelect.value = historyItem.activityId;
+    //         form.querySelector('#notesInput').value = historyItem.notes;
+    //         if (pointsInput && historyItem.points !== undefined) {
+    //             pointsInput.value = historyItem.points;
+    //         }
+
+    //         if (dateInput && historyItem.timestamp) {
+    //             const [datePart, timePart] = historyItem.timestamp.split('-');
+    //             if (datePart) {
+    //                 const [day, month, year] = datePart.split('.');
+    //                 if (day && month && year) {
+    //                     dateInput.value = `${year}-${month}-${day}`;
+    //                 }
+    //             }
+
+    //             const [hours, minutes, seconds] = timePart ? timePart.split(':') : ['00', '00', '00'];
+    //             timeInput.value = `${hours}:${minutes}`;
+    //         }
+    //     } else {
+    //         // Режим добавления
+    //         modalTitle.textContent = 'Добавить активность';
+    //         if (historyIdInput) {
+    //             historyIdInput.value = '';
+    //         }
+
+    //         // Устанавливаем текущую дату и время
+    //         const now = new Date();
+    //         const year = now.getFullYear();
+    //         const month = String(now.getMonth() + 1).padStart(2, '0');
+    //         const day = String(now.getDate()).padStart(2, '0');
+    //         const hours = String(now.getHours()).padStart(2, '0');
+    //         const minutes = String(now.getMinutes()).padStart(2, '0');
+
+    //         if (dateInput) {
+    //             dateInput.value = `${year}-${month}-${day}`;
+    //         }
+    //         if (timeInput) {
+    //             timeInput.value = `${hours}:${minutes}`;
+    //         }
+    //     }
+
+    //     modal.style.display = 'block';
+
+    //     // Обработчик изменения выбора активности
+    //     activitySelect.onchange = () => {
+    //         const selectedActivityId = activitySelect.value;
+    //         if (selectedActivityId && this.activities[selectedActivityId]) {
+    //             pointsInput.value = this.activities[selectedActivityId].points;
+    //         } else {
+    //             pointsInput.value = '';
+    //         }
+    //     };
+    // }
     showActivityFormModal(historyItemString = null) {
         const modal = document.getElementById('activityFormModal');
         const form = document.getElementById('activityForm');
@@ -888,49 +1085,96 @@ async loadSkills() {
         const pointsInput = form.querySelector('#pointsInput');
         const dateInput = form.querySelector('#dateInput');
         const timeInput = form.querySelector('#timeInput');
-
+        const taskFields = document.getElementById('taskFieldsHistory');
+        const dueDateInput = document.getElementById('activityDueDate');
+        const dueTimeInput = document.getElementById('activityDueTime');
+        const isDoneCheckbox = document.getElementById('isDoneCheckbox');
+    
         // Очищаем и заполняем список активностей
         activitySelect.innerHTML = '<option value="">Выберите действие</option>';
-        Object.entries(this.activities)
-            .filter(([_, activity]) => activity.skill_code === this.currentSkill.code)
-            .forEach(([id, activity]) => {
-                const option = document.createElement('option');
-                option.value = id;
-                option.textContent = `${activity.name} (+${activity.points} очков)`;
-                activitySelect.appendChild(option);
-            });
-
+        
+        // Фильтруем активности в зависимости от выбранного типа
+        const updateActivityList = (isTask) => {
+            activitySelect.innerHTML = '<option value="">Выберите действие</option>';
+            Object.entries(this.activities)
+                .filter(([_, activity]) => {
+                    return activity.skill_code === this.currentSkill.code && 
+                           activity.isTask === isTask;
+                })
+                .forEach(([id, activity]) => {
+                    const option = document.createElement('option');
+                    option.value = id;
+                    option.textContent = `${activity.name} (+${activity.points} очков)`;
+                    activitySelect.appendChild(option);
+                });
+        };
+    
+        // Обработчик переключения типа активности
+        const radioButtons = form.querySelectorAll('input[name="activityType"]');
+        radioButtons.forEach(radio => {
+            radio.onchange = (e) => {
+                const isTask = e.target.value === 'task';
+                taskFields.style.display = isTask ? 'block' : 'none';
+                updateActivityList(isTask);
+            };
+        });
+    
         // Сбрасываем форму
         form.reset();
-
+    
         let historyItem = null;
         if (historyItemString) {
-            historyItem = historyItemString;
+            historyItem = typeof historyItemString === 'string' ? 
+                JSON.parse(historyItemString) : historyItemString;
         }
-
+    
         if (historyItem) {
             // Режим редактирования
             modalTitle.textContent = 'Редактировать активность';
+            const activity = this.activities[historyItem.activityId];
+            
             if (historyIdInput) {
                 historyIdInput.value = historyItem.id;
             }
+    
+            // Устанавливаем тип активности
+            const isTask = activity && activity.isTask;
+            const typeRadio = form.querySelector(`input[name="activityType"][value="${isTask ? 'task' : 'regular'}"]`);
+            if (typeRadio) {
+                typeRadio.checked = true;
+                taskFields.style.display = isTask ? 'block' : 'none';
+            }
+    
+            // Обновляем список активностей и выбираем нужную
+            updateActivityList(isTask);
             activitySelect.value = historyItem.activityId;
             form.querySelector('#notesInput').value = historyItem.notes;
+            
             if (pointsInput && historyItem.points !== undefined) {
                 pointsInput.value = historyItem.points;
             }
-
-            if (dateInput && historyItem.timestamp) {
+    
+            // Заполняем дату и время создания
+            if (dateInput && timeInput && historyItem.timestamp) {
                 const [datePart, timePart] = historyItem.timestamp.split('-');
                 if (datePart) {
                     const [day, month, year] = datePart.split('.');
-                    if (day && month && year) {
-                        dateInput.value = `${year}-${month}-${day}`;
-                    }
+                    dateInput.value = `${year}-${month}-${day}`;
                 }
-
-                const [hours, minutes, seconds] = timePart ? timePart.split(':') : ['00', '00', '00'];
+                const [hours, minutes] = timePart ? timePart.split(':') : ['00', '00'];
                 timeInput.value = `${hours}:${minutes}`;
+            }
+    
+            // Заполняем срок выполнения и статус для задачи
+            if (isTask && activity) {
+                if (activity.dueDate && dueDateInput && dueTimeInput) {
+                    const dueDateTime = new Date(activity.dueDate);
+                    dueDateInput.value = dueDateTime.toISOString().split('T')[0];
+                    dueTimeInput.value = dueDateTime.toTimeString().slice(0, 5);
+                }
+                if (isDoneCheckbox) {
+                    isDoneCheckbox.checked = activity.isDone || false;
+                }
             }
         } else {
             // Режим добавления
@@ -938,7 +1182,7 @@ async loadSkills() {
             if (historyIdInput) {
                 historyIdInput.value = '';
             }
-
+    
             // Устанавливаем текущую дату и время
             const now = new Date();
             const year = now.getFullYear();
@@ -946,17 +1190,18 @@ async loadSkills() {
             const day = String(now.getDate()).padStart(2, '0');
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
-
+    
             if (dateInput) {
                 dateInput.value = `${year}-${month}-${day}`;
             }
             if (timeInput) {
                 timeInput.value = `${hours}:${minutes}`;
             }
+    
+            // По умолчанию показываем задачи
+            updateActivityList(true);
         }
-
-        modal.style.display = 'block';
-
+    
         // Обработчик изменения выбора активности
         activitySelect.onchange = () => {
             const selectedActivityId = activitySelect.value;
@@ -966,8 +1211,85 @@ async loadSkills() {
                 pointsInput.value = '';
             }
         };
+    
+        modal.style.display = 'block';
     }
-
+    //--1
+    // async handleActivitySubmit(event) {
+    //     event.preventDefault();
+    //     this.showLoading();
+    
+    //     const form = event.target;
+    //     const historyId = form.historyId.value;
+    //     const activityId = form.activity.value;
+    //     const notes = form.notes.value;
+    //     const date = form.date.value;
+    //     const time = form.time.value;
+    //     let points = form.points.value;
+    //     const isTask = form.activityType.value === 'task';
+    //     const isDone = isTask ? form.isDone.checked : false;
+        
+    //     let dueDate = null;
+    //     if (isTask && form.dueDate.value) {
+    //         dueDate = `${form.dueDate.value}T${form.dueTime.value || '23:59'}`;
+    //     }
+    
+    //     if (!activityId) {
+    //         alert('Пожалуйста, выберите действие');
+    //         return;
+    //     }
+    
+    //     try {
+    //         const requestBody = {
+    //             activityId,
+    //             notes,
+    //             points: parseInt(points),
+    //             timestamp: this.formatDateTime(date, time),
+    //             isTask,
+    //             isDone,
+    //             dueDate
+    //         };
+    
+    //         let response;
+    //         if (historyId) {
+    //             // Режим редактирования
+    //             response = await fetch(`${SKILLS_SERVICE_URL}/${this.currentSkill.code}/history/${historyId}?user=${this.currentUser}`, {
+    //                 method: 'PUT',
+    //                 headers: { 'Content-Type': 'application/json' },
+    //                 body: JSON.stringify(requestBody)
+    //             });
+    //         } else {
+    //             // Режим добавления
+    //             response = await fetch(`${SKILLS_SERVICE_URL}/${this.currentSkill.code}/history?user=${this.currentUser}`, {
+    //                 method: 'POST',
+    //                 headers: { 'Content-Type': 'application/json' },
+    //                 body: JSON.stringify(requestBody)
+    //             });
+    //         }
+    
+    //         if (!response.ok) {
+    //             throw new Error('Failed to submit activity');
+    //         }
+    
+    //         // Начисляем очки по правилам:
+    //         // - Для обычной активности всегда сразу
+    //         // - Для задачи без срока сразу
+    //         // - Для задачи со сроком только при выполнении
+    //         if (!isTask || !dueDate || isDone) {
+    //             await this.addPoints(parseInt(points));
+    //         }
+    
+    //         // Обновляем данные навыка
+    //         this.currentSkill = await this.loadSkillDetails(this.currentSkill.code);
+    //         this.render();
+    //         this.hideActivityFormModal();
+    //     } catch (error) {
+    //         console.error('Error submitting activity:', error);
+    //         alert('Произошла ошибка при добавлении/редактировании активности');
+    //     } finally {
+    //         this.hideLoading();
+    //     }
+    // }
 
     hideActivityFormModal() {
         const modal = document.getElementById('activityFormModal');
@@ -1038,6 +1360,79 @@ async loadSkills() {
     //         this.hideLoading();
     //     }
     // }
+    //-2-
+    // async handleActivitySubmit(event) {
+    //     event.preventDefault();
+    //     this.showLoading();
+    
+    //     const form = event.target;
+    //     const historyId = form.historyId.value;
+    //     const activityId = form.activity.value;
+    //     const notes = form.notes.value;
+    //     const date = form.date.value;
+    //     const time = form.time.value;
+    //     let points = form.points.value;
+    
+    //     if (!activityId) {
+    //         alert('Пожалуйста, выберите действие');
+    //         return;
+    //     }
+
+    //     // Проверяем, что points не пустая строка
+    //     if (!points) {
+    //         // Если points пустая, то получаем points из activities
+    //         const selectedActivity = this.activities[activityId];
+    //         points = selectedActivity ? selectedActivity.points : 0;
+    //     }
+    
+    //     try {
+    //         let response;
+    //         if (historyId) {
+    //             // Режим редактирования
+    //             response = await fetch(`${SKILLS_SERVICE_URL}/${this.currentSkill.code}/history/${historyId}?user=${this.currentUser}`, {
+    //                 method: 'PUT',
+    //                 headers: {
+    //                     'Content-Type': 'application/json'
+    //                 },
+    //                 body: JSON.stringify({
+    //                     activityId,
+    //                     notes,
+    //                     points: parseInt(points),
+    //                     timestamp: this.formatDateTime(date, time)
+    //                 })
+    //             });
+    //         } else {
+    //             // Режим добавления
+    //             response = await fetch(`${SKILLS_SERVICE_URL}/${this.currentSkill.code}/history?user=${this.currentUser}`, {
+    //                 method: 'POST',
+    //                 headers: {
+    //                     'Content-Type': 'application/json'
+    //                 },
+    //                 body: JSON.stringify({
+    //                     activityId,
+    //                     notes,
+    //                     points: parseInt(points),
+    //                     timestamp: this.formatDateTime(date, time)
+    //                 })
+    //             });
+    //         }
+    
+    //         if (!response.ok) {
+    //             throw new Error('Failed to submit activity');
+    //         }
+    
+    //         // Обновляем данные навыка
+    //         this.currentSkill = await this.loadSkillDetails(this.currentSkill.code);
+    //         this.render();
+    //         this.hideActivityFormModal();
+    //     } catch (error) {
+    //         console.error('Error submitting activity:', error);
+    //         alert('Произошла ошибка при добавлении/редактировании активности');
+    //     } finally {
+    //         this.hideLoading();
+    //     }
+    // }
+
     async handleActivitySubmit(event) {
         event.preventDefault();
         this.showLoading();
@@ -1049,53 +1444,57 @@ async loadSkills() {
         const date = form.date.value;
         const time = form.time.value;
         let points = form.points.value;
+        const isTask = form.activityType.value === 'task';
+        const isDone = isTask ? form.isDone.checked : false;
+        
+        let dueDate = null;
+        if (isTask && form.dueDate.value) {
+            dueDate = `${form.dueDate.value}T${form.dueTime.value || '23:59'}`;
+        }
     
         if (!activityId) {
             alert('Пожалуйста, выберите действие');
             return;
         }
-
-        // Проверяем, что points не пустая строка
-        if (!points) {
-            // Если points пустая, то получаем points из activities
-            const selectedActivity = this.activities[activityId];
-            points = selectedActivity ? selectedActivity.points : 0;
-        }
     
         try {
+            const requestBody = {
+                activityId,
+                notes,
+                points: parseInt(points),
+                timestamp: this.formatDateTime(date, time),
+                isTask,
+                isDone,
+                dueDate
+            };
+    
             let response;
             if (historyId) {
                 // Режим редактирования
                 response = await fetch(`${SKILLS_SERVICE_URL}/${this.currentSkill.code}/history/${historyId}?user=${this.currentUser}`, {
                     method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        activityId,
-                        notes,
-                        points: parseInt(points),
-                        timestamp: this.formatDateTime(date, time)
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
                 });
             } else {
                 // Режим добавления
                 response = await fetch(`${SKILLS_SERVICE_URL}/${this.currentSkill.code}/history?user=${this.currentUser}`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        activityId,
-                        notes,
-                        points: parseInt(points),
-                        timestamp: this.formatDateTime(date, time)
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
                 });
             }
     
             if (!response.ok) {
                 throw new Error('Failed to submit activity');
+            }
+    
+            // Начисляем очки по правилам:
+            // - Для обычной активности всегда сразу
+            // - Для задачи без срока сразу
+            // - Для задачи со сроком только при выполнении
+            if (!isTask || !dueDate || isDone) {
+                await this.addPoints(parseInt(points));
             }
     
             // Обновляем данные навыка
@@ -1109,7 +1508,6 @@ async loadSkills() {
             this.hideLoading();
         }
     }
-
 
     formatDateTime(date, time) {
         // Преобразуем HTML5 input date (YYYY-MM-DD) в наш формат (DD.MM.YYYY-HH:MM:SS)
