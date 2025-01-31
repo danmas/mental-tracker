@@ -38,19 +38,28 @@ app.post('/ensureUserFilesExist', async (req, res) => {
 
 // app.get('/skills', async (req, res) => {
 //     try {
-//         const user = req.query.user; // Получаем логин пользователя из запроса
-
+//         const { user } = req.query;
+//         console.log('Getting skills for user:', user);
+        
 //         if (!user) {
-//             throw new Error('Пользователь не указан');
+//             console.log('No user provided');
+//             return res.status(400).json({ error: 'User parameter is required' });
 //         }
 
-//         // Получаем навыки для конкретного пользователя
-//         const skills = await data.getAllSkills(user);
-//         res.status(201).json({ success: true, ...skills });
+//         let skills = await data.getAllSkills(user);
+//         console.log('Retrieved skills:', skills);
+
+//         // Убедимся, что возвращаем массив
+//         const response = Array.isArray(skills) ? skills : [];
+//         res.json(response);
+//         // skills = Array.isArray(skills) ? skills : [];
+//         // res.status(201).json({ success: true, ...skills });
 //     } catch (error) {
+//         console.error('Error getting skills:', error);
 //         res.status(500).json({ error: error.message });
 //     }
 // });
+
 app.get('/skills', async (req, res) => {
     try {
         const { user } = req.query;
@@ -61,17 +70,23 @@ app.get('/skills', async (req, res) => {
             return res.status(400).json({ error: 'User parameter is required' });
         }
 
-        const skills = await data.getAllSkills(user);
+        let skills = await data.getAllSkills(user);
         console.log('Retrieved skills:', skills);
 
         // Убедимся, что возвращаем массив
-        const response = Array.isArray(skills) ? skills : [];
-        res.json(response);
+        const skills_array = Array.isArray(skills) ? skills : [];
+        
+        // Возвращаем объект с флагом success и массивом skills
+        res.json({
+            success: true,
+            skills: skills_array
+        });
     } catch (error) {
         console.error('Error getting skills:', error);
         res.status(500).json({ error: error.message });
     }
 });
+
 
 app.get('/skills/:skillCode', async (req, res) => {
     try {
@@ -487,6 +502,7 @@ app.post('/skills/:skillCode/points', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
 
 app.get('/editor', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'json_editor.html'));

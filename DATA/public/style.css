@@ -212,12 +212,6 @@ body {
     margin: 1rem 0;  /* Уменьшили отступы */
 }
 
-.history-item {
-    padding: 0.75rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
 
 .history-item > div {
     display: flex;

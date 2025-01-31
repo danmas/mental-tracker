@@ -73,9 +73,34 @@ async function writeSkillsData(data, user) {
     }
 }
 
-
-
+//
+//-- history
+//
 async function readHistoryData(user) {
+    if(user = 'erv') {
+        return await readHistoryData_jsonbin();
+    } else {
+        return await readHistoryData_local(user);
+    }
+}
+
+async function writeHistoryData(data, user) {
+    if(user = 'erv') {
+        await writeHistoryData_jsonbin(data);
+    } else {
+        await writeHistoryData_local(data, user);
+    }
+}
+
+async function writeHistoryData_local(data, user) {
+    try {
+        await fs.writeFile(historyFilePath(user), JSON.stringify(data, null, 4));
+    } catch (error) {
+        console.error('Ошибка записи в файл history.json:', error);
+        throw new Error(`Ошибка записи в файл: ${historyFilePath(user)}`);
+    }
+}
+async function readHistoryData_local(user) {
     try {
         const data = await fs.readFile(historyFilePath(user), 'utf-8');
         return JSON.parse(data);
@@ -85,18 +110,34 @@ async function readHistoryData(user) {
     }
 }
 
-async function writeHistoryData(data, user) {
-    try {
-        await fs.writeFile(historyFilePath(user), JSON.stringify(data, null, 4));
-    } catch (error) {
-        console.error('Ошибка записи в файл history.json:', error);
-        throw new Error(`Ошибка записи в файл: ${historyFilePath(user)}`);
+
+
+
+
+
+
+
+//
+//-- actions
+//
+async function readActionsData(user) {
+    if(user = 'erv') {
+        return await readActionsData_jsonbin();
+    } else {
+        return await readActionsData_local(user);
+    }
+}
+
+async function writeActionsData(data, user) {
+    if(user = 'erv') {
+        await writeActionsData_jsonbin(data);
+    } else {
+        await writeActionsData_local(data,user);
     }
 }
 
 
-
-async function readActionsData(user) {
+async function readActionsData_local(user) {
     try {
         console.log('readActionsData ' + user + ' ' + actionsFilePath(user));
         const data = await fs.readFile(actionsFilePath(user), 'utf-8');
@@ -107,7 +148,7 @@ async function readActionsData(user) {
     }
 }
 
-async function writeActionsData(data, user) {
+async function writeActionsData_local(data, user) {
     try {
         await fs.writeFile(actionsFilePath(user), JSON.stringify(data, null, 4));
     } catch (error) {
@@ -115,39 +156,6 @@ async function writeActionsData(data, user) {
         throw new Error(`Ошибка записи в файл: ${actionsFilePath(user)}`);
     }
 }
-
-
-// async function addActivity(activity, user) {
-//     try {
-//         const actionsData = await readActionsData(user); // Передаем логин пользователя
-
-//         // Генерируем уникальный id для активности
-//         const activityId = `activity_${Date.now()}`;
-
-//         // Валидация обязательных полей
-//         if (!activity.name || !activity.skill_code || !activity.points) {
-//             throw new Error('Отсутствуют обязательные поля (name, skill_code, points)');
-//         }
-
-//         // Добавляем новую активность, преобразуя points в число
-//         actionsData.activities[activityId] = {
-//             name: activity.name,
-//             description: activity.description || '',
-//             points: parseInt(activity.points) || 0,  // Преобразуем в число
-//             skill_code: activity.skill_code
-//         };
-
-//         // Сохраняем обновленный файл
-//         await writeActionsData(actionsData, user); // Передаем логин пользователя
-
-//         return {
-//             id: activityId,
-//             ...actionsData.activities[activityId]
-//         };
-//     } catch (error) {
-//         throw error;
-//     }
-// }
 
 
 
@@ -187,7 +195,7 @@ async function addActivity(activity, user) {
 
 const axios = require('axios');
 const BIN_ID_HISTORY = '6776e6f0ad19ca34f8e4af75';
-const BIN_ID_actions = '6776ee69ad19ca34f8e4b236';
+const BIN_ID_ACTIONS = '6776ee69ad19ca34f8e4b236';
 //const API_KEY = '$2a$10$Jn1kVlOFNV8oXzIJqx5xRemNZGyLAqGK5rerTT5lv43FPgN/qd.Si';
 const API_KEY = '$2a$10$PVL7lQvItBvbwEtyKtmrquOMxG1W9AQd5Cb70p2qVYjW2ytMsGB8.';
 //$2a$10$PVL7lQvItBvbwEtyKtmrquOMxG1W9AQd5Cb70p2qVYjW2ytMsGB8.
@@ -219,132 +227,44 @@ async function writeHistoryData_jsonbin(data) {
         });
        } catch (error) {
         console.error('Ошибка записи в файл history.json:', error);
-        throw new Error(`Ошибка записи в файл: ${historyFilePath}`);
+        throw new Error(`Ошибка записи в файл: historyFilePath`);
     }
 }
 
 
+async function readActionsData_jsonbin() {
+    try {
+        const response = await axios.get(`https://api.jsonbin.io/v3/b/${BIN_ID_ACTIONS}`, {
+            headers: {
+                'X-Master-Key': API_KEY
+            }
+        });
+        return response.data.record;
+        } catch (error) {
+        console.error('Ошибка чтения файла actions.json:', error);
+        throw new Error(`Ошибка чтения файла с jsonbin actionsFilePath`);
+    }
+}
+
+// --- Запись данных в JSON файлы ---
+
+async function writeActionsData_jsonbin(data) {
+    try {
+        await axios.put(`https://api.jsonbin.io/v3/b/${BIN_ID_ACTIONS}`, data, {
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Master-Key': API_KEY
+            }
+        });
+       } catch (error) {
+        console.error('Ошибка записи в файл actions.json:', error);
+        throw new Error(`Ошибка записи в файл  actions`);
+    }
+}
+
 // --- Получение данных ---
 
-// async function getUserData() {
-//     try {
-//         const historyData = await readHistoryData();
-//         return historyData.user;
-//     } catch (error) {
-//         throw error;
-//     }
-// }
 
-
-
-// async function getAllSkills() {
-//     try {
-//         const skillsData = await readSkillsData();
-//         const historyData = await readHistoryData();
-        
-//         const enrichedSkills = skillsData.skills.map(skill => {
-//             const skillHistory = historyData.skills[skill.code];
-            
-//             // Сортируем историю по timestamp в обратном порядке
-//             const sortedHistory = [...skillHistory.history].sort((a, b) => {
-//                 return new Date(b.timestamp) - new Date(a.timestamp);
-//             });
-//             return {
-//                 ...skill,
-//                 level: skillHistory.level || 0,
-//                 currentPoints: skillHistory.currentPoints || 0,
-//                 progress: skillHistory.progress || 0,
-//                 achievements: skillHistory.achievements || [],
-//                 history: sortedHistory
-//             };
-//         });
-        
-//         return enrichedSkills;
-//     } catch (error) {
-//         console.error('Ошибка при получении данных о навыках:', error);
-//         throw error;
-//     }
-// }
-
-
-// async function getAllSkills(user) {
-//     try {
-//         // Читаем данные о навыках для конкретного пользователя
-//         const skillsData = await readSkillsData(user);
-//         const historyData = await readHistoryData(user);
-
-//         // Обогащаем навыки данными из истории
-//         //if(historyData != null) {
-//             const enrichedSkills = skillsData.skills.map(skill => {
-//             const skillHistory = historyData.skills[skill.code];
-
-//             if(skillHistory != null) {
-//                 // Сортируем историю по timestamp в обратном порядке
-//                 const sortedHistory = [...skillHistory.history].sort((a, b) => {
-//                     return new Date(b.timestamp) - new Date(a.timestamp);
-//                 });
-//             }
-//         //}
-
-//             return {
-//                 ...skill,
-//                 level: skillHistory.level || 0,
-//                 currentPoints: skillHistory.currentPoints || 0,
-//                 progress: skillHistory.progress || 0,
-//                 achievements: skillHistory.achievements || [],
-//                 history: sortedHistory
-//             };
-//         });
-
-//         return enrichedSkills;
-//     } catch (error) {
-//         console.error('Ошибка при получении данных о навыках:', error);
-//         throw error;
-//     }
-// }
-
-// async function getAllSkills(user) {
-//     try {
-//         // Читаем данные о навыках для конкретного пользователя
-//         const skillsData = await readSkillsData(user);
-//         const historyData = await readHistoryData(user);
-
-//         // Обогащаем навыки данными из истории
-//         const enrichedSkills = skillsData.skills.map(skill => {
-//             let skillHistory = historyData.skills[skill.code];
-
-//             // Проверяем, существует ли skillHistory
-//             if (!skillHistory) {
-//                 skillHistory = {
-//                     level: 0,
-//                     currentPoints: 0,
-//                     progress: 0,
-//                     achievements: [],
-//                     history: []
-//                 };
-//             }
-
-//             // Сортируем историю по timestamp в обратном порядке
-//             const sortedHistory = [...skillHistory.history].sort((a, b) => {
-//                 return dateUtils.parseDate(b.timestamp) - dateUtils.parseDate(a.timestamp);
-//             });
-
-//             return {
-//                 ...skill,
-//                 level: skillHistory.level || 0,
-//                 currentPoints: skillHistory.currentPoints || 0,
-//                 progress: skillHistory.progress || 0,
-//                 achievements: skillHistory.achievements || [],
-//                 history: sortedHistory
-//             };
-//         });
-
-//         return enrichedSkills;
-//     } catch (error) {
-//         console.error('Ошибка при получении данных о навыках:', error);
-//         throw error;
-//     }
-// }
 async function getAllSkills(user) {
     try {
         // Читаем данные о навыках для конкретного пользователя
@@ -399,39 +319,6 @@ async function getAllSkills(user) {
 }
 
 
-// async function getSkillData(skillCode, user) {
-//     try {
-//         // Читаем данные о навыках и истории для конкретного пользователя
-//         // const skillsData = await readSkillsData(user);
-//         const skillsData = await readSkillsData(user);
-//         const historyData = await readHistoryData(user);
-
-//         // Находим навык по коду
-//         const skill = skillsData.skills.find(skill => skill.code === skillCode);
-//         const skillHistory = historyData.skills[skillCode];
-
-//         if (!skill || !skillHistory) {
-//             throw new Error(`Навык с кодом ${skillCode} не найден`);
-//         }
-
-//         // Сортируем историю по timestamp в обратном порядке
-//         const sortedHistory = [...skillHistory.history].sort((a, b) => {
-//             return dateUtils.parseDate(b.timestamp) - dateUtils.parseDate(a.timestamp);
-//         });
-
-//         // Возвращаем навык со всеми данными и отсортированной историей
-//         return {
-//             ...skill,
-//             level: skillHistory.level || 0,
-//             currentPoints: skillHistory.currentPoints || 0,
-//             progress: skillHistory.progress || 0,
-//             achievements: skillHistory.achievements || [],
-//             history: sortedHistory
-//         };
-//     } catch (error) {
-//         throw error;
-//     }
-// }
 async function getSkillData(skillCode, user) {
     try {
         // Читаем данные о навыках и истории для конкретного пользователя
@@ -476,7 +363,6 @@ async function getSkillData(skillCode, user) {
         throw error;
     }
 }
-
 
 
 async function getSkillHistory(skillCode, user) {
@@ -525,62 +411,7 @@ async function getActivities(user) {
 
 
 // --- Добавление данных ---
-// Добавляем новую функцию для обновления активности
-// async function updateActivity(activityId, updateData, user) {
-//     try {
-//         const actionsData = await readActionsData(user);
-//         const activity = actionsData.activities[activityId];
 
-//         if (!activity) {
-//             throw new Error(`Активность с ID ${activityId} не найдена`);
-//         }
-
-//         // Обновляем поля активности
-//         actionsData.activities[activityId] = {
-//             ...activity,
-//             ...updateData,
-//             // Если задача помечена как выполненная и у неё не было даты выполнения
-//             completedDate: updateData.isDone && !activity.completedDate ? 
-//                 new Date().toISOString() : 
-//                 activity.completedDate
-//         };
-
-//         await writeActionsData(actionsData, user);
-
-//         return actionsData.activities[activityId];
-//     } catch (error) {
-//         console.error('Error updating activity:', error);
-//         throw error;
-//     }
-// }
-// Добавляем новую функцию для обновления активности
-// async function updateActivity(activityId, updateData, user) {
-//     try {
-//         const actionsData = await readActionsData(user);
-//         const activity = actionsData.activities[activityId];
-
-//         if (!activity) {
-//             throw new Error(`Активность с ID ${activityId} не найдена`);
-//         }
-
-//         // Обновляем поля активности
-//         actionsData.activities[activityId] = {
-//             ...activity,
-//             ...updateData,
-//             // Если задача помечена как выполненная и у неё не было даты выполнения
-//             completedDate: updateData.isDone && !activity.completedDate ? 
-//                 new Date().toISOString() : 
-//                 activity.completedDate
-//         };
-
-//         await writeActionsData(actionsData, user);
-
-//         return actionsData.activities[activityId];
-//     } catch (error) {
-//         console.error('Error updating activity:', error);
-//         throw error;
-//     }
-// }
 async function updateActivity(activityId, updateData, user) {
     try {
         const actionsData = await readActionsData(user);
@@ -610,99 +441,6 @@ async function updateActivity(activityId, updateData, user) {
 }
 
 
-
-// async function addHistoryRecord(skillCode, record, user) {
-//     try {
-//         const historyData = await readHistoryData(user);
-
-//         // Проверяем, существует ли структура для навыка
-//         if (!historyData.skills[skillCode]) {
-//             historyData.skills[skillCode] = {
-//                 level: 0,
-//                 currentPoints: 0,
-//                 progress: 0,
-//                 achievements: [],
-//                 history: []
-//             };
-//         }
-
-//         const newRecord = {
-//             id: `act_${Date.now()}`, // Уникальный ID для записи
-//             ...record, // Используем переданные данные, включая timestamp
-//         };
-//         historyData.skills[skillCode].history.push(newRecord);
-//         await writeHistoryData(historyData, user);
-//         return newRecord;
-//     } catch (error) {
-//         throw error;
-//     }
-// }
-// Обновляем существующую функцию addHistoryRecord
-// async function addHistoryRecord(skillCode, record, user) {
-//     try {
-//         const historyData = await readHistoryData(user);
-
-//         // Проверяем, существует ли структура для навыка
-//         if (!historyData.skills[skillCode]) {
-//             historyData.skills[skillCode] = {
-//                 level: 0,
-//                 currentPoints: 0,
-//                 progress: 0,
-//                 achievements: [],
-//                 history: []
-//             };
-//         }
-
-//         const newRecord = {
-//             id: `act_${Date.now()}`,
-//             ...record,
-//             // Обработка полей задачи
-//             isDone: record.isDone || false,
-//             completedDate: record.completedDate || null,
-//             dueDate: record.dueDate || null,
-//             isTask: record.isTask || false
-//         };
-
-//         historyData.skills[skillCode].history.push(newRecord);
-//         await writeHistoryData(historyData, user);
-//         return newRecord;
-//     } catch (error) {
-//         throw error;
-//     }
-// }
-// Обновляем существующую функцию addHistoryRecord
-// async function addHistoryRecord(skillCode, record, user) {
-//     try {
-//         const historyData = await readHistoryData(user);
-
-//         // Проверяем, существует ли структура для навыка
-//         if (!historyData.skills[skillCode]) {
-//             historyData.skills[skillCode] = {
-//                 level: 0,
-//                 currentPoints: 0,
-//                 progress: 0,
-//                 achievements: [],
-//                 history: []
-//             };
-//         }
-
-//         const newRecord = {
-//             id: `act_${Date.now()}`,
-//             ...record,
-//             // Обработка полей задачи
-//             isDone: record.isDone || false,
-//             completedDate: record.completedDate || null,
-//             dueDate: record.dueDate || null,
-//             isTask: record.isTask || false
-//         };
-
-//         historyData.skills[skillCode].history.push(newRecord);
-//         await writeHistoryData(historyData, user);
-//         return newRecord;
-//     } catch (error) {
-//         throw error;
-//     }
-// }
 async function addHistoryRecord(skillCode, record, user) {
     try {
         const historyData = await readHistoryData(user);
@@ -736,6 +474,7 @@ async function addHistoryRecord(skillCode, record, user) {
     }
 }
 
+
 async function addAchievement(skillCode, achievement, user) {
     try {
         const historyData = await readHistoryData(user);
@@ -754,6 +493,7 @@ async function addAchievement(skillCode, achievement, user) {
         throw error;
     }
 }
+
 
 module.exports = {
     readSkillsData,
