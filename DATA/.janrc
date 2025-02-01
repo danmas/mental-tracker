@@ -1,0 +1,36 @@
+﻿logFolderPath: C:\ERV\mental-tracker\DATA
+logLlamaCppPath: ./logs/cortex.log
+logTensorrtLLMPath: ./logs/cortex.log
+logOnnxPath: ./logs/cortex.log
+dataFolderPath: C:\ERV\mental-tracker\DATA
+maxLogLines: 100000
+apiServerHost: 127.0.0.1
+apiServerPort: 39291
+checkedForUpdateAt: 0
+checkedForLlamacppUpdateAt: 0
+latestRelease: default_version
+latestLlamacppRelease: ""
+huggingFaceToken: ""
+gitHubUserAgent: ""
+gitHubToken: ""
+llamacppVariant: windows-amd64-avx512
+llamacppVersion: v0.1.49
+enableCors: true
+allowedOrigins:
+  - http://localhost:39281
+  - http://127.0.0.1:39281
+  - http://0.0.0.0:39281
+proxyUrl: ""
+verifyProxySsl: true
+verifyProxyHostSsl: true
+proxyUsername: ""
+proxyPassword: ""
+noProxy: example.com,::1,localhost,127.0.0.1
+verifyPeerSsl: false
+verifyHostSsl: true
+sslCertPath: ""
+sslKeyPath: ""
+supportedEngines:
+  - llama-cpp
+  - onnxruntime
+  - tensorrt-llm
