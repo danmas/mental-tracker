@@ -1,0 +1,16 @@
+{
+  "notify": true,
+  "run_mode": "cpu",
+  "nvidia_driver": {
+    "exist": false,
+    "version": ""
+  },
+  "cuda": {
+    "exist": false,
+    "version": ""
+  },
+  "gpus": [],
+  "gpus_in_use": [],
+  "is_initial": false,
+  "vulkan": false
+}
