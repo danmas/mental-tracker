@@ -1,22 +1,26 @@
-﻿const pgData = require('../pg-data'); // Changed
+﻿const { createStorageAdapter, STORAGE_TYPE } = require('../storage-config');
 const dateUtils = require('./dateUtils'); // Kept, as it's used for date sorting
+
+// Создаем адаптер хранилища на основе конфигурации
+const storageAdapter = createStorageAdapter();
+console.log(`Using storage type: ${STORAGE_TYPE}`);
 
 // No longer need fs, path, axios for file/JSONbin operations
 
 // --- Database Initialization ---
 async function initializeDatabase(user_id = null) { // Added user_id parameter
     try {
-        await pgData.connect();
-        await pgData.createSchema();
-        await pgData.createTables(); // Tables now have user_id column
+        await storageAdapter.connect();
+        await storageAdapter.createSchema();
+        await storageAdapter.createTables(); // Tables now have user_id column
         
         if (user_id) { // Only seed if user_id is provided
             // Check if this user already has skills to prevent duplicate seeding
-            const existingSkills = await pgData.readData('skills', {}, user_id);
+            const existingSkills = await storageAdapter.readData('skills', {}, user_id);
             if (!existingSkills || existingSkills.length === 0) {
                 console.log(`Seeding initial skills for user ${user_id}...`);
-                await pgData.writeData('skills', { user_id, name: "Рисование", description: "Общие навыки рисования", complexity: 5, familiarity: 10 });
-                await pgData.writeData('skills', { user_id, name: "Музыка Практика", description: "Практика на музыкальном инструменте", complexity: 7, familiarity: 20 });
+                await storageAdapter.writeData('skills', { user_id, name: "Рисование", description: "Общие навыки рисования", complexity: 5, familiarity: 10 });
+                await storageAdapter.writeData('skills', { user_id, name: "Музыка Практика", description: "Практика на музыкальном инструменте", complexity: 7, familiarity: 20 });
             }
         }
     } catch (error) {
@@ -31,7 +35,7 @@ async function initializeDatabase(user_id = null) { // Added user_id parameter
 async function readSkillsData(user_id) {
     if (!user_id) throw new Error("user_id is required to read skills data.");
     try {
-        return await pgData.readData('skills', {}, user_id);
+        return await storageAdapter.readData('skills', {}, user_id);
     } catch (error) {
         console.error(`Ошибка чтения данных навыков из БД для пользователя ${user_id}:`, error);
         throw error;
@@ -42,7 +46,7 @@ async function readSkillsData(user_id) {
 async function readHistoryData(user_id) {
     if (!user_id) throw new Error("user_id is required to read history data.");
     try {
-        return await pgData.readData('history', {}, user_id);
+        return await storageAdapter.readData('history', {}, user_id);
     } catch (error) {
         console.error(`Ошибка чтения истории из БД для пользователя ${user_id}:`, error);
         throw error;
@@ -53,7 +57,7 @@ async function readHistoryData(user_id) {
 async function readActionsData(user_id) {
     if (!user_id) throw new Error("user_id is required to read actions data.");
     try {
-        return await pgData.readData('actions', {}, user_id);
+        return await storageAdapter.readData('actions', {}, user_id);
     } catch (error) {
         console.error(`Ошибка чтения действий из БД для пользователя ${user_id}:`, error);
         throw error;
@@ -77,7 +81,7 @@ async function writeSkillData(user_id, skillData) {
             familiarity: skillData.familiarity || 0,
             ...(skillData.id && { id: skillData.id })
         };
-        return await pgData.writeData('skills', dataToWrite);
+        return await storageAdapter.writeData('skills', dataToWrite);
     } catch (error) {
         console.error(`Ошибка записи навыка в БД для пользователя ${user_id}:`, error);
         throw error;
@@ -95,7 +99,7 @@ async function addHistoryEvent(user_id, recordData) {
             ...recordData,
             user_id: user_id // Add user_id
         };
-        return await pgData.writeData('history', dataToWrite);
+        return await storageAdapter.writeData('history', dataToWrite);
     } catch (error) {
         console.error(`Ошибка записи события истории в БД для пользователя ${user_id}:`, error);
         throw error;
@@ -116,7 +120,7 @@ async function addNewAction(user_id, actionData) {
             details: actionData.details || (actionData.name ? `Name: ${actionData.name}, Description: ${actionData.description || ''}` : ''),
             duration_minutes: actionData.duration_minutes || (actionData.points ? parseInt(actionData.points) : null)
         };
-        return await pgData.writeData('actions', dataToWrite);
+        return await storageAdapter.writeData('actions', dataToWrite);
     } catch (error) {
         console.error(`Ошибка записи действия в БД для пользователя ${user_id}:`, error);
         throw error;
@@ -163,7 +167,7 @@ async function getAllSkills(user_id) {
 async function getSkillData(user_id, skillName) {
     if (!user_id) throw new Error("user_id is required for getSkillData.");
     try {
-        const skills = await pgData.readData('skills', { name: skillName }, user_id);
+        const skills = await storageAdapter.readData('skills', { name: skillName }, user_id);
         if (!skills || skills.length === 0) {
             throw new Error(`Навык с именем ${skillName} не найден в БД для пользователя ${user_id}`);
         }
@@ -191,13 +195,13 @@ async function getSkillData(user_id, skillName) {
 async function getSkillHistory(user_id, skillName) {
     if (!user_id) throw new Error("user_id is required for getSkillHistory.");
     try {
-        const skills = await pgData.readData('skills', { name: skillName }, user_id);
+        const skills = await storageAdapter.readData('skills', { name: skillName }, user_id);
         if (!skills || skills.length === 0) {
             throw new Error(`Навык с именем ${skillName} не найден в БД для пользователя ${user_id} для получения истории`);
         }
         const skill = skills[0];
 
-        const historyEvents = await pgData.readData('history', { skill_id: skill.id }, user_id);
+        const historyEvents = await storageAdapter.readData('history', { skill_id: skill.id }, user_id);
         const sortedHistory = historyEvents.sort((a, b) => new Date(b.event_date) - new Date(a.event_date));
         
         return sortedHistory;
@@ -233,7 +237,7 @@ async function getActivities(user_id) {
 async function updateActivity(user_id, activityId, updateData) {
     if (!user_id) throw new Error("user_id is required for updateActivity.");
     try {
-        const actions = await pgData.readData('actions', { id: activityId }, user_id);
+        const actions = await storageAdapter.readData('actions', { id: activityId }, user_id);
         if (!actions || actions.length === 0) {
             throw new Error(`Активность с ID ${activityId} не найдена в БД для пользователя ${user_id}`);
         }
@@ -241,7 +245,7 @@ async function updateActivity(user_id, activityId, updateData) {
 
         const dataToUpdate = {
             id: activityId, // Crucial for update
-            user_id: user_id, // Ensure user_id is part of the update payload for pgData.writeData
+            user_id: user_id, // Ensure user_id is part of the update payload for storageAdapter.writeData
             skill_id: updateData.skill_id || existingAction.skill_id,
             action_type: updateData.action_type || existingAction.action_type,
             details: updateData.details || existingAction.details,
@@ -254,7 +258,7 @@ async function updateActivity(user_id, activityId, updateData) {
                 delete dataToUpdate[key];
             }
         }
-        return await pgData.writeData('actions', dataToUpdate);
+        return await storageAdapter.writeData('actions', dataToUpdate);
     } catch (error) {
         console.error(`Error updating activity in DB for user ${user_id}:`, error);
         throw error;
@@ -264,7 +268,7 @@ async function updateActivity(user_id, activityId, updateData) {
 async function addHistoryRecord(user_id, skillName, record) {
     if (!user_id) throw new Error("user_id is required for addHistoryRecord.");
     try {
-        const skills = await pgData.readData('skills', { name: skillName }, user_id);
+        const skills = await storageAdapter.readData('skills', { name: skillName }, user_id);
         if (!skills || skills.length === 0) {
             throw new Error(`Навык с именем ${skillName} не найден в БД для пользователя ${user_id} для добавления записи истории.`);
         }
@@ -289,7 +293,7 @@ async function addHistoryRecord(user_id, skillName, record) {
 async function addAchievement(user_id, skillName, achievement) {
     if (!user_id) throw new Error("user_id is required for addAchievement.");
     try {
-        const skills = await pgData.readData('skills', { name: skillName }, user_id);
+        const skills = await storageAdapter.readData('skills', { name: skillName }, user_id);
         if (!skills || skills.length === 0) {
             throw new Error(`Навык ${skillName} не найден в БД для пользователя ${user_id} для добавления достижения.`);
         }
@@ -315,7 +319,7 @@ async function addActivity(user_id, activityData) {
         if (!activityData.skill_code) {
             throw new Error('skill_code (skill name) is required to add an activity.');
         }
-        const skills = await pgData.readData('skills', { name: activityData.skill_code }, user_id);
+        const skills = await storageAdapter.readData('skills', { name: activityData.skill_code }, user_id);
         if (!skills || skills.length === 0) {
             throw new Error(`Навык с именем ${activityData.skill_code} не найден для пользователя ${user_id} для добавления активности.`);
         }
@@ -383,7 +387,7 @@ module.exports = {
         }
 
         try {
-            return await pgData.writeData('history', dataToUpdate);
+            return await storageAdapter.writeData('history', dataToUpdate);
         } catch (error) {
             console.error(`Ошибка обновления события истории ${historyId} для пользователя ${user_id}:`, error);
             throw error;
@@ -395,7 +399,7 @@ module.exports = {
         if (!user_id) throw new Error("user_id is required to delete history event.");
         if (!historyId) throw new Error("historyId is required to delete history event.");
         try {
-            return await pgData.deleteData('history', user_id, { id: historyId });
+            return await storageAdapter.deleteData('history', user_id, { id: historyId });
         } catch (error) {
             console.error(`Ошибка удаления события истории ${historyId} для пользователя ${user_id}:`, error);
             throw error;
@@ -410,7 +414,7 @@ module.exports = {
 
         try {
             // Delete all existing history for the user
-            await pgData.deleteData('history', user_id, {}); // Empty criteria deletes all for this user_id
+            await storageAdapter.deleteData('history', user_id, {}); // Empty criteria deletes all for this user_id
 
             const results = [];
             for (const entry of historyEntriesArray) {
@@ -419,7 +423,7 @@ module.exports = {
                     continue;
                 }
                 // Assuming entry is a valid payload for addHistoryEvent (skill_id, event_type, notes)
-                // addHistoryEvent already adds user_id to the object it passes to pgData.writeData
+                // addHistoryEvent already adds user_id to the object it passes to storageAdapter.writeData
                 results.push(await addHistoryEvent(user_id, entry));
             }
             console.log(`Successfully wrote ${results.length} history entries for user ${user_id}.`);
@@ -438,7 +442,7 @@ module.exports = {
 
         try {
             // Delete all existing actions for the user
-            await pgData.deleteData('actions', user_id, {}); // Empty criteria deletes all for this user_id
+            await storageAdapter.deleteData('actions', user_id, {}); // Empty criteria deletes all for this user_id
 
             const results = [];
             for (const entry of actionsArray) {
@@ -456,5 +460,5 @@ module.exports = {
             console.error(`Ошибка полной записи действий для пользователя ${user_id}:`, error);
             throw error;
         }
-    }
+    },
 };
