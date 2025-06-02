@@ -96,12 +96,12 @@ class MentalTracker {
     async ensureUserFilesExist(user) {
         try {
             // Отправляем запрос на сервер для создания файлов данных
-            const response = await fetch('/ensureUserFilesExist', {
+            const response = await fetch('/initializeUserData', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ user })
+                body: JSON.stringify({ userId: user })
             });
     
             if (!response.ok) {
@@ -148,7 +148,7 @@ class MentalTracker {
 
     async init() {
         if (!this.currentUser) {
-            alert('Пользователь не выбран');
+            // Не показываем alert, просто возвращаемся - пользователь еще не авторизован
             return;
         }        
 
@@ -1071,5 +1071,13 @@ let app = null;
 // Инициализация приложения
 document.addEventListener('DOMContentLoaded', () => {
     app = new MentalTracker();
-    app.init();
+    
+    // Проверяем есть ли сохраненный пользователь
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser) {
+        // Автоматически входим как сохраненный пользователь
+        document.getElementById('loginInput').value = savedUser;
+        app.handleLogin();
+    }
+    // Если нет сохраненного пользователя, остается форма входа
 });
