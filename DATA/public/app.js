@@ -161,14 +161,39 @@ class MentalTracker {
     }
 
     async loadActivities() {
+        console.log('=== loadActivities() START ===');
+        console.log('Current user:', this.currentUser);
         try {
-            //const response = await fetch('http://localhost:3050/activities');
-            const response = await fetch(`/activities?user=${this.currentUser}`);
-            this.activities = await response.json();
+            const url = `/activities?user=${this.currentUser}`;
+            console.log('Fetching activities from:', url);
+            
+            const response = await fetch(url);
+            console.log('Response status:', response.status);
+            console.log('Response ok:', response.ok);
+            
+            const responseData = await response.json();
+            console.log('Raw response:', responseData);
+            
+            // Извлекаем поле activities из ответа сервера
+            this.activities = responseData.activities || responseData || {};
+            console.log('Extracted activities:', this.activities);
+            console.log('Activities count:', Object.keys(this.activities).length);
+            
+            // Проверяем каждую активность
+            Object.entries(this.activities).forEach(([id, activity]) => {
+                console.log(`Activity ${id}:`, {
+                    name: activity.name,
+                    skill_code: activity.skill_code,
+                    points: activity.points,
+                    isTask: activity.isTask
+                });
+            });
+            
         } catch (error) {
             console.error('Error loading activities:', error);
             this.activities = {};
         }
+        console.log('=== loadActivities() END ===');
     }
 
     async addActivity(skillCode, activityId, notes) {
@@ -537,7 +562,7 @@ renderHistoryItem(item) {
             </div>
             <div class="history-item-actions">
                 <p class="timestamp">${item.timestamp.split('-')[1]}</p>
-                <span class="points-badge">+${item.points} очков</span>
+                <span class="points-badge">+${this.extractPointsFromNotes(item.notes)} очков</span>
                 ${activity.isTask ? `
                     <label class="task-checkbox">
                         <input type="checkbox" 
@@ -672,6 +697,12 @@ async loadSkills() {
         const groups = {};
 
         history.forEach(item => {
+            // Проверяем что timestamp существует и содержит дефис
+            if (!item.timestamp || typeof item.timestamp !== 'string' || !item.timestamp.includes('-')) {
+                console.warn('Invalid timestamp in history item:', item);
+                return; // Пропускаем элемент с некорректным timestamp
+            }
+            
             // Получаем дату без времени
             const datePart = item.timestamp.split('-')[0];
             if (!groups[datePart]) {
@@ -703,9 +734,6 @@ async loadSkills() {
         const dueTimeInput = document.getElementById('activityDueTime');
         const isDoneCheckbox = document.getElementById('isDoneCheckbox');
     
-        // Очищаем и заполняем список активностей
-        activitySelect.innerHTML = '<option value="">Выберите действие</option>';
-        
         // Фильтруем активности в зависимости от выбранного типа
         const updateActivityList = (isTask) => {
             activitySelect.innerHTML = '<option value="">Выберите действие</option>';
@@ -983,12 +1011,15 @@ async loadSkills() {
 
         const historyHTML = groupedHistory.map(([date, items]) => {
             const dateId = date.replace(/\./g, '-');
+            // Исправляем подсчет очков за день
+            const dayPoints = items.reduce((sum, item) => sum + this.extractPointsFromNotes(item.notes), 0);
+            
             return `
             <div class="history-day">
                 <div class="day-header" onclick="app.toggleDayHistory('${date}')">
                     <span id="icon-${dateId}">▼</span>
                     <h3>${date}</h3>
-                    <span class="day-points">+${items.reduce((sum, item) => sum + item.points, 0)} очков</span>
+                    <span class="day-points">+${dayPoints} очков</span>
                 </div>
                 <div id="history-${dateId}">
                     ${items.map(item => {
@@ -1001,7 +1032,7 @@ async loadSkills() {
                                 </div>
                                 <div class="history-item-actions">
                                     <p class="timestamp">${item.timestamp.split('-')[1]}</p>
-                                    <span class="points-badge">+${item.points} очков</span>
+                                    <span class="points-badge">+${this.extractPointsFromNotes(item.notes)} очков</span>
                                     <button class="btn btn-edit" onclick='app.showActivityFormModal(${JSON.stringify(item).replace(/'/g, "\\'")})'>
                                         ✎
                                     </button>
@@ -1062,6 +1093,27 @@ async loadSkills() {
             willpower: '🧠'
         };
         return icons[code] || '📚';
+    }
+
+    extractPointsFromNotes(notes) {
+        // Ищем "Points added: X" в записях типа points_increased
+        const pointsMatch = notes.match(/Points added: (\d+)/);
+        if (pointsMatch) {
+            return parseInt(pointsMatch[1]);
+        }
+        
+        // Для записей "Completed activity" ищем активность по названию
+        if (notes.startsWith('Completed activity:')) {
+            const activityName = notes.replace('Completed activity: ', '').trim();
+            // Ищем активность с таким названием в this.activities
+            const activity = Object.values(this.activities).find(act => 
+                act.name === activityName || act.details === activityName
+            );
+            return activity ? activity.points : 0;
+        }
+        
+        // Для других типов записей возвращаем 0
+        return 0;
     }
 }
 

@@ -145,13 +145,24 @@ async function getAllSkills(user_id) {
             const skillHistoryEvents = allHistory.filter(h => h.skill_id === skill.id && h.user_id === user_id);
             const sortedHistory = skillHistoryEvents.sort((a, b) => new Date(b.event_date) - new Date(a.event_date));
             
+            // Переименовываем event_date в timestamp для совместимости с фронтендом
+            const historyWithTimestamp = sortedHistory.map(item => ({
+                ...item,
+                timestamp: item.event_date
+            }));
+            
+            // Вычисляем правильный прогресс и текущие очки
+            const currentLevel = Math.floor(skill.familiarity / 10);
+            const pointsInCurrentLevel = skill.familiarity % 10;
+            const progressPercent = (pointsInCurrentLevel / 10) * 100;
+            
             return {
                 ...skill,
                 code: skill.name,
-                history: sortedHistory,
+                history: historyWithTimestamp,
                 level: skill.familiarity / 10,
-                currentPoints: 0, 
-                progress: 0,      
+                currentPoints: pointsInCurrentLevel, 
+                progress: progressPercent,      
                 achievements: [] 
             };
         });
@@ -177,13 +188,24 @@ async function getSkillData(user_id, skillName) {
         const skillHistoryEvents = allHistoryForUser.filter(h => h.skill_id === skill.id);
         const sortedHistory = skillHistoryEvents.sort((a, b) => new Date(b.event_date) - new Date(a.event_date));
 
+        // Переименовываем event_date в timestamp для совместимости с фронтендом
+        const historyWithTimestamp = sortedHistory.map(item => ({
+            ...item,
+            timestamp: item.event_date
+        }));
+
+        // Вычисляем правильный прогресс и текущие очки
+        const currentLevel = Math.floor(skill.familiarity / 10);
+        const pointsInCurrentLevel = skill.familiarity % 10;
+        const progressPercent = (pointsInCurrentLevel / 10) * 100;
+
         return {
             ...skill,
             code: skill.name,
-            history: sortedHistory,
+            history: historyWithTimestamp,
             level: skill.familiarity / 10,
-            currentPoints: 0,
-            progress: 0,
+            currentPoints: pointsInCurrentLevel,
+            progress: progressPercent,
             achievements: []
         };
     } catch (error) {
@@ -204,7 +226,13 @@ async function getSkillHistory(user_id, skillName) {
         const historyEvents = await storageAdapter.readData('history', { skill_id: skill.id }, user_id);
         const sortedHistory = historyEvents.sort((a, b) => new Date(b.event_date) - new Date(a.event_date));
         
-        return sortedHistory;
+        // Переименовываем event_date в timestamp для совместимости с фронтендом
+        const historyWithTimestamp = sortedHistory.map(item => ({
+            ...item,
+            timestamp: item.event_date
+        }));
+        
+        return historyWithTimestamp;
     } catch (error) {
         console.error(`Ошибка при получении истории для навыка ${skillName} из БД для пользователя ${user_id}:`, error);
         throw error;
@@ -216,12 +244,24 @@ async function getActivities(user_id) {
     try {
         console.log(`getActivities from DB for user ${user_id}`);
         const allActions = await readActionsData(user_id);
+        const allSkills = await readSkillsData(user_id);
+        
+        // Создаем мапу skill_id -> skill_name для преобразования
+        const skillIdToName = {};
+        allSkills.forEach(skill => {
+            skillIdToName[skill.id] = skill.name;
+        });
+        
         const activitiesObject = {};
         allActions.forEach(action => {
             activitiesObject[action.id] = {
                 ...action,
+                name: action.details || 'Активность',
+                description: action.details || '',
                 points: action.duration_minutes || 0,
-                skill_code: action.skill_id 
+                skill_code: skillIdToName[action.skill_id] || action.skill_id, // Преобразуем skill_id в название навыка
+                isTask: action.action_type === 'task',
+                isDone: !!action.completed_at
             };
         });
         
