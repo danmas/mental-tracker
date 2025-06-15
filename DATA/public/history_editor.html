@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>History Editor</title>
+    <title>History Editor - Автономный редактор истории</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -19,10 +19,46 @@
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
+        .header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #404040;
+        }
+        .user-selector {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #363636;
+            border-radius: 6px;
+        }
+        .user-selector label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .user-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        select, input[type="text"] {
+            padding: 8px 12px;
+            border: 1px solid #404040;
+            border-radius: 4px;
+            background-color: #2d2d2d;
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+        select {
+            min-width: 200px;
+        }
+        input[type="text"] {
+            width: 150px;
+        }
         .button-group {
             margin-bottom: 20px;
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
         }
         .form-group {
             margin-bottom: 15px;
@@ -59,6 +95,10 @@
         button.secondary:hover {
             background-color: #777;
         }
+        button.small {
+            padding: 6px 12px;
+            font-size: 14px;
+        }
         #status {
             margin-top: 10px;
             padding: 10px;
@@ -75,29 +115,126 @@
         #downloadAnchor {
             display: none;
         }
+        .current-user {
+            font-weight: bold;
+            color: #4d7c4d;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>History Editor</h2>
+        <div class="header">
+            <h2>🔧 History Editor</h2>
+            <p>Автономный редактор истории пользователей Mental Tracker</p>
+        </div>
+        
+        <div class="user-selector">
+            <label>Выбор пользователя:</label>
+            <div class="user-controls">
+                <select id="userSelect">
+                    <option value="">Загрузка пользователей...</option>
+                </select>
+                <span>или</span>
+                <input type="text" id="customUser" placeholder="Имя пользователя">
+                <button onclick="switchUser()" class="small">Переключиться</button>
+                <button onclick="refreshUsers()" class="secondary small">🔄</button>
+            </div>
+            <p>Текущий пользователь: <span id="currentUserDisplay" class="current-user">не выбран</span></p>
+        </div>
+
         <div class="button-group">
-            <button onclick="loadHistory()">Загрузить текущую историю</button>
-            <button onclick="saveHistory()" class="secondary">Сохранить изменения</button>
-            <button onclick="downloadHistory()" class="secondary">Скачать history.json</button>
-            <button onclick="formatJson()" class="secondary">Форматировать JSON</button>
+            <button onclick="loadHistory()">📥 Загрузить историю</button>
+            <button onclick="saveHistory()" class="secondary">💾 Сохранить изменения</button>
+            <button onclick="downloadHistory()" class="secondary">📁 Скачать JSON</button>
+            <button onclick="formatJson()" class="secondary">✨ Форматировать</button>
+            <button onclick="clearEditor()" class="secondary">🗑️ Очистить</button>
         </div>
+        
         <div class="form-group">
-            <textarea id="historyData" placeholder="JSON данные истории будут загружены сюда"></textarea>
+            <textarea id="historyData" placeholder="JSON данные истории будут загружены сюда..."></textarea>
         </div>
+        
         <div id="status"></div>
         <a id="downloadAnchor"></a>
     </div>
 
     <script>
-        //const API_URL = 'http://localhost:3050';
         const API_URL = '';
         const statusDiv = document.getElementById('status');
         const historyTextarea = document.getElementById('historyData');
+        const userSelect = document.getElementById('userSelect');
+        const customUserInput = document.getElementById('customUser');
+        const currentUserDisplay = document.getElementById('currentUserDisplay');
+        
+        let currentUser = '';
+
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadUsers();
+            
+            // Проверяем URL параметры
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlUser = urlParams.get('user');
+            
+            if (urlUser) {
+                currentUser = urlUser;
+                customUserInput.value = urlUser;
+                updateCurrentUserDisplay();
+                await loadHistory();
+            }
+        });
+
+        async function loadUsers() {
+            try {
+                const response = await fetch('/users');
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
+                
+                userSelect.innerHTML = '<option value="">-- Выберите пользователя --</option>';
+                data.users.forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user;
+                    option.textContent = user;
+                    userSelect.appendChild(option);
+                });
+                
+                showStatus(`Загружено ${data.users.length} пользователей`);
+            } catch (error) {
+                showStatus(`Ошибка загрузки пользователей: ${error.message}`, true);
+                userSelect.innerHTML = '<option value="">Ошибка загрузки</option>';
+            }
+        }
+
+        function switchUser() {
+            const selectedUser = userSelect.value || customUserInput.value.trim();
+            
+            if (!selectedUser) {
+                showStatus('Выберите или введите имя пользователя', true);
+                return;
+            }
+            
+            currentUser = selectedUser;
+            updateCurrentUserDisplay();
+            
+            // Обновляем URL без перезагрузки страницы
+            const newUrl = new URL(window.location);
+            newUrl.searchParams.set('user', currentUser);
+            window.history.pushState({}, '', newUrl);
+            
+            showStatus(`Переключено на пользователя: ${currentUser}`);
+            
+            // Очищаем редактор
+            historyTextarea.value = '';
+        }
+
+        function updateCurrentUserDisplay() {
+            currentUserDisplay.textContent = currentUser || 'не выбран';
+            currentUserDisplay.style.color = currentUser ? '#4d7c4d' : '#e0e0e0';
+        }
+
+        async function refreshUsers() {
+            await loadUsers();
+        }
 
         function showStatus(message, isError = false) {
             statusDiv.textContent = message;
@@ -105,27 +242,35 @@
             setTimeout(() => {
                 statusDiv.textContent = '';
                 statusDiv.className = '';
-            }, 3000);
+            }, 4000);
         }
 
         async function loadHistory() {
+            if (!currentUser) {
+                showStatus('Сначала выберите пользователя', true);
+                return;
+            }
+            
             try {
-                //const response = await fetch(`${API_URL}/history`);
-                const response = await fetch(`/history`);
+                const response = await fetch(`/history?user=${encodeURIComponent(currentUser)}`);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
                 historyTextarea.value = JSON.stringify(data, null, 2);
-                showStatus('История успешно загружена');
+                showStatus(`История пользователя "${currentUser}" загружена успешно`);
             } catch (error) {
-                showStatus(`Ошибка загрузки: ${error.message}`, true);
+                showStatus(`Ошибка загрузки истории: ${error.message}`, true);
             }
         }
 
         async function saveHistory() {
+            if (!currentUser) {
+                showStatus('Сначала выберите пользователя', true);
+                return;
+            }
+            
             try {
                 const jsonData = JSON.parse(historyTextarea.value);
-                //const response = await fetch(`${API_URL}/history`, {
-                const response = await fetch(`/history`, {
+                const response = await fetch(`/history?user=${encodeURIComponent(currentUser)}`, {
                         method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -135,13 +280,18 @@
                 
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const result = await response.json();
-                showStatus('История успешно сохранена');
+                showStatus(`История пользователя "${currentUser}" сохранена успешно`);
             } catch (error) {
                 showStatus(`Ошибка сохранения: ${error.message}`, true);
             }
         }
 
         function downloadHistory() {
+            if (!currentUser) {
+                showStatus('Сначала выберите пользователя', true);
+                return;
+            }
+            
             try {
                 const jsonData = JSON.parse(historyTextarea.value);
                 const dataStr = JSON.stringify(jsonData, null, 2);
@@ -149,10 +299,10 @@
                 const url = window.URL.createObjectURL(dataBlob);
                 const a = document.getElementById('downloadAnchor');
                 a.href = url;
-                a.download = 'history.json';
+                a.download = `history_${currentUser}.json`;
                 a.click();
                 window.URL.revokeObjectURL(url);
-                showStatus('Файл готов к скачиванию');
+                showStatus(`Файл history_${currentUser}.json готов к скачиванию`);
             } catch (error) {
                 showStatus(`Ошибка при подготовке файла: ${error.message}`, true);
             }
@@ -168,8 +318,32 @@
             }
         }
 
-        // Загружаем историю при открытии страницы
+        function clearEditor() {
+            if (confirm('Очистить редактор? Несохраненные изменения будут потеряны.')) {
+                historyTextarea.value = '';
+                showStatus('Редактор очищен');
+            }
+        }
+
+        // Горячие клавиши
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey) {
+                switch(e.key) {
+                    case 's':
+                        e.preventDefault();
+                        saveHistory();
+                        break;
+                    case 'o':
+                        e.preventDefault();
         loadHistory();
+                        break;
+                    case 'f':
+                        e.preventDefault();
+                        formatJson();
+                        break;
+                }
+            }
+        });
     </script>
 </body>
 </html>

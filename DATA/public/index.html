@@ -22,9 +22,22 @@
 
     <!-- Добавьте этот код в index.html перед основным контентом -->
     <div id="loginForm" class="login-form">
-        <h2>Выберите пользователя</h2>
-        <input type="text" id="loginInput" placeholder="Введите логин" required>
-        <button id="loginButton" class="btn btn-primary">Войти</button>
+        <h2>🚀 Ментальный Трекер</h2>
+        <p>Выберите пользователя для работы с приложением</p>
+        
+        <div class="user-selector">
+            <label class="form-label">Выбор пользователя:</label>
+            <div class="user-controls">
+                <select id="userSelect" class="form-select">
+                    <option value="">Загрузка пользователей...</option>
+                </select>
+                <span>или</span>
+                <input type="text" id="loginInput" class="form-input" placeholder="Новый пользователь">
+                <button type="button" id="refreshUsersBtn" class="btn btn-secondary">🔄</button>
+            </div>
+        </div>
+        
+        <button id="loginButton" class="btn btn-primary">Войти в приложение</button>
     </div>
 
     <main class="container" id="mainContent">

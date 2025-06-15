@@ -77,7 +77,7 @@ async function writeSkillsData(data, user) {
 //-- history
 //
 async function readHistoryData(user) {
-    if(user = 'erv') {
+    if(user === 'erv') {
         return await readHistoryData_jsonbin();
     } else {
         return await readHistoryData_local(user);
@@ -85,7 +85,7 @@ async function readHistoryData(user) {
 }
 
 async function writeHistoryData(data, user) {
-    if(user = 'erv') {
+    if(user === 'erv') {
         await writeHistoryData_jsonbin(data);
     } else {
         await writeHistoryData_local(data, user);
@@ -121,7 +121,7 @@ async function readHistoryData_local(user) {
 //-- actions
 //
 async function readActionsData(user) {
-    if(user = 'erv') {
+    if(user === 'erv') {
         return await readActionsData_jsonbin();
     } else {
         return await readActionsData_local(user);
@@ -129,7 +129,7 @@ async function readActionsData(user) {
 }
 
 async function writeActionsData(data, user) {
-    if(user = 'erv') {
+    if(user === 'erv') {
         await writeActionsData_jsonbin(data);
     } else {
         await writeActionsData_local(data,user);

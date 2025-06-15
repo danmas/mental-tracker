@@ -15,6 +15,9 @@ class MentalTracker {
         // Обработчик для кнопки входа
         document.getElementById('loginButton').addEventListener('click', () => this.handleLogin());
 
+        // Обработчик для кнопки обновления пользователей
+        document.getElementById('refreshUsersBtn').addEventListener('click', () => this.loadUsers());
+
         // DOM элементы
         this.mainContent = document.getElementById('mainContent');
         this.backButton = document.getElementById('backButton');
@@ -22,7 +25,6 @@ class MentalTracker {
 
         // Привязка обработчиков
         this.backButton.addEventListener('click', () => this.showMainView());
-
 
         // ... существующий код ...
 
@@ -38,6 +40,33 @@ class MentalTracker {
         document.addEventListener('mouseup', (e) => this.handleModalMouseUp(e));
 
         this.loadingOverlay = document.getElementById('loadingOverlay');
+        
+        // Загружаем пользователей при инициализации
+        this.loadUsers();
+    }
+
+    async loadUsers() {
+        try {
+            const response = await fetch('/users');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            
+            const userSelect = document.getElementById('userSelect');
+            userSelect.innerHTML = '<option value="">-- Выберите пользователя --</option>';
+            
+            data.users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user;
+                option.textContent = user;
+                userSelect.appendChild(option);
+            });
+            
+            console.log(`Загружено ${data.users.length} пользователей`);
+        } catch (error) {
+            console.error('Ошибка загрузки пользователей:', error);
+            const userSelect = document.getElementById('userSelect');
+            userSelect.innerHTML = '<option value="">Ошибка загрузки</option>';
+        }
     }
 
     async addPoints(points) {
@@ -67,18 +96,21 @@ class MentalTracker {
     }
     
     async handleLogin() {
-        const login = document.getElementById('loginInput').value.trim();
-        if (!login) {
-            alert('Пожалуйста, введите логин');
+        const userSelect = document.getElementById('userSelect');
+        const loginInput = document.getElementById('loginInput');
+        const selectedUser = userSelect.value || loginInput.value.trim();
+        
+        if (!selectedUser) {
+            alert('Пожалуйста, выберите пользователя из списка или введите новое имя');
             return;
         }
     
-        this.currentUser = login;
-        localStorage.setItem('currentUser', login); // Сохраняем логин в localStorage
+        this.currentUser = selectedUser;
+        localStorage.setItem('currentUser', selectedUser); // Сохраняем логин в localStorage
     
         try {
             // Убеждаемся, что файлы данных для пользователя существуют
-            await this.ensureUserFilesExist(login);
+            await this.ensureUserFilesExist(selectedUser);
         } catch (error) {
             console.error('Ошибка при создании файлов данных:', error);
             alert('Произошла ошибка при создании файлов данных');

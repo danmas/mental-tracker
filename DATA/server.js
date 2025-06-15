@@ -505,13 +505,36 @@ app.post('/skills/:skillCode/points', async (req, res) => {
 
 
 app.get('/editor', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'json_editor.html'));
+    res.sendFile(path.join(__dirname, 'public', 'history_editor.html'));
 });
 
 app.get('/ping', (req, res) => {
     res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+app.get('/users', async (req, res) => {
+    try {
+        const fs = require('fs').promises;
+        const path = require('path');
+        const _dir = path.join(__dirname, '../../../MYDATA');
+        
+        // Читаем содержимое папки MYDATA
+        const files = await fs.readdir(_dir);
+        
+        // Извлекаем уникальных пользователей из имен файлов
+        const users = new Set();
+        files.forEach(file => {
+            if (file.startsWith('skills_') && file.endsWith('.json')) {
+                const user = file.replace('skills_', '').replace('.json', '');
+                users.add(user);
+            }
+        });
+        
+        res.json({ success: true, users: Array.from(users).sort() });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
 app.listen(port, () => {
     console.log(`Сервер запущен на порту ${port}`);

@@ -569,3 +569,100 @@ input[type="time"]::-webkit-calendar-picker-indicator {
     height: 16px;
     cursor: pointer;
 }
+
+/* Форма входа */
+.login-form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: var(--card-bg);
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.login-form h2 {
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+    text-align: center;
+}
+
+.login-form p {
+    margin-bottom: 2rem;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.user-selector {
+    width: 100%;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.user-selector .form-label {
+    display: block;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.user-controls {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.user-controls span {
+    color: var(--text-secondary);
+    font-style: italic;
+    white-space: nowrap;
+}
+
+.user-controls .form-select {
+    flex: 2;
+    min-width: 200px;
+}
+
+.user-controls .form-input {
+    flex: 1;
+    min-width: 150px;
+}
+
+.login-form .btn {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.1rem;
+    margin-top: 1rem;
+}
+
+/* Медиа-запросы для мобильных устройств */
+@media (max-width: 640px) {
+    .login-form {
+        margin: 1rem;
+        padding: 1.5rem;
+    }
+    
+    .user-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .user-controls .form-select,
+    .user-controls .form-input {
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .user-controls span {
+        text-align: center;
+        margin: 0.5rem 0;
+    }
+}
